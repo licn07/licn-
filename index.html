@@ -19,8 +19,8 @@
             --bg-secondary: #f5f5f5;
             --text-primary: #111111;
             --text-secondary: #666666;
-            --card-bg: rgba(255, 255, 255, 0.95);
-            --card-border: rgba(0, 0, 0, 0.1);
+            --card-bg: rgba(255, 255, 255, 0.25);
+            --card-border: rgba(255, 255, 255, 0.3);
             --tidal-gradient: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c);
         }
 
@@ -29,8 +29,8 @@
             --bg-secondary: #1a1a2e;
             --text-primary: #ffffff;
             --text-secondary: #aaaaaa;
-            --card-bg: rgba(20, 20, 35, 0.85);
-            --card-border: rgba(255, 255, 255, 0.1);
+            --card-bg: rgba(20, 20, 35, 0.25);
+            --card-border: rgba(255, 255, 255, 0.15);
             --tidal-gradient: linear-gradient(-45deg, #0a0a12, #1a1a2e, #0f0f23, #16213e);
         }
 
@@ -81,6 +81,8 @@
             justify-content: center;
             z-index: 999;
             transition: transform 0.12s ease;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
         }
 
         .theme-toggle:active {
@@ -125,6 +127,8 @@
             font-weight: 500;
             position: relative;
             z-index: 2;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
         }
 
         .post-card:nth-child(1) { animation-delay: 0.2s; }
@@ -187,14 +191,14 @@
         </header>
 
         <div class="posts">
-            <div class="post-card" onclick="bounceThis(this); goPoster()">海报工具</div>
-            <div class="post-card" onclick="bounceThis(this); goPage2()">功能二</div>
-            <div class="post-card" onclick="bounceThis(this); goPage3()">功能三</div>
+            <!-- 👉 就是这里改好了 -->
+            <div class="post-card" onclick="bounceThis(this); location.href='海报自定义工具.html'">海报自定义工具</div>
+            <div class="post-card" onclick="bounceThis(this); location.href='页面2.html'">功能二</div>
+            <div class="post-card" onclick="bounceThis(this); location.href='页面3.html'">功能三</div>
         </div>
     </div>
 
     <script>
-        // 粒子效果
         const canvas = document.getElementById('particles');
         const ctx = canvas.getContext('2d');
         let w = window.innerWidth, h = window.innerHeight;
@@ -240,7 +244,6 @@
             canvas.width=w;canvas.height=h;
         });
 
-        // 几何微动
         function createShapes(){
             const colors = ['#fff','#667eea','#764ba2'];
             for(let i=0;i<8;i++){
@@ -258,18 +261,11 @@
         }
         createShapes();
 
-        // 按钮弹动
         function bounceThis(el) {
             el.classList.add('bounce');
             setTimeout(()=>el.classList.remove('bounce'),100);
         }
 
-        // —— GitHub 根目录跳转（文件都在根目录，直接写文件名）
-        function goPoster() { location.href = "海报工具.html"; }
-        function goPage2() { location.href = "页面2.html"; }
-        function goPage3() { location.href = "页面3.html"; }
-
-        // 主题切换
         const tg = document.getElementById('themeToggle');
         const html = document.documentElement;
         const saved = localStorage.getItem('theme')||'light';
