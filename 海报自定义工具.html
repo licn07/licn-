@@ -53,9 +53,13 @@
             display:flex;align-items:center;justify-content:center;
             background:#fff;cursor:pointer;
             transition:0.2s;
+            -webkit-tap-highlight-color: transparent;
         }
         .stamp-item img{max-width:70%;max-height:70%;object-fit:contain}
-        .stamp-item.selected{border-color:#0099ff;background:#e6f7ff;}
+        .stamp-item.selected{
+            border-color:#0099ff;
+            background:#e6f7ff;
+        }
 
         .expand-btn{
             width:100%;
@@ -64,6 +68,7 @@
             background:#f7f8fa;
             border:none;border-radius:8px;
             color:#333;cursor:pointer;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .preview-area{
@@ -80,7 +85,8 @@
             border:2px dashed #0099ff;
             background:#fff;
             border-radius:12px;color:#0099ff;font-size:16px;
-            margin-bottom:12px;cursor:pointer
+            margin-bottom:12px;cursor:pointer;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .btn-group{
@@ -90,12 +96,14 @@
             flex:1;padding:14px;
             border:none;border-radius:12px;
             background:#0099ff;
-            color:#fff;font-size:16px;cursor:pointer
+            color:#fff;font-size:16px;cursor:pointer;
+            -webkit-tap-highlight-color: transparent;
         }
         .download-btn{
             flex:1;padding:14px;
             border:none;border-radius:12px;
-            background:#00c851;color:#fff;font-size:16px;cursor:pointer;display:none
+            background:#00c851;color:#fff;font-size:16px;cursor:pointer;display:none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .result-tip{
@@ -144,6 +152,12 @@
         }
 
         #fileInput{display:none}
+
+        /* 只去掉蓝色高亮，不破坏功能 */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            outline: none !important;
+        }
     </style>
 </head>
 <body>
@@ -205,7 +219,6 @@
     const downloadBtn = document.getElementById('downloadBtn');
     const resultContainer = document.getElementById('resultContainer');
 
-    // 自动检测 边框.png / 方框.png 哪个存在
     function detectFrameFile() {
         return new Promise(resolve => {
             const img = new Image();
@@ -290,7 +303,6 @@
         downloadBtn.style.display = "block";
     };
 
-    // 核心修复：手机浏览器批量下载防拦截，逐个延迟下载
     downloadBtn.onclick = async ()=>{
         downloadBtn.disabled = true;
         downloadBtn.innerText = "下载中...";
@@ -303,10 +315,8 @@
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-            // 延迟300ms，避免浏览器批量拦截
             await new Promise(resolve => setTimeout(resolve, 300));
         }
-
         downloadBtn.disabled = false;
         downloadBtn.innerText = "下载图片";
     };
