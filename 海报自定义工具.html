@@ -153,7 +153,6 @@
 
         #fileInput{display:none}
 
-        /* 只去掉蓝色高亮，不破坏功能 */
         * {
             -webkit-tap-highlight-color: transparent;
             outline: none !important;
@@ -183,14 +182,11 @@
 
     <div class="section">
         <div class="preview-area" id="previewArea"></div>
-
         <button class="upload-btn" id="uploadBtn">点击我上传图片</button>
-
         <div class="btn-group">
             <button class="process-btn" id="processBtn">开始处理</button>
             <button class="download-btn" id="downloadBtn">下载图片</button>
         </div>
-
         <div id="resultContainer"></div>
     </div>
 </div>
@@ -236,14 +232,14 @@
     for(let i=1;i<=10;i++){
         let item = document.createElement('div');
         item.className = 'stamp-item';
-        item.innerHTML = `<img src="${i}.png">`;
+        item.innerHTML = `<img src="${i}.png?${Math.random()}">`;
         stampList.appendChild(item);
         item.onclick = ()=>{
             useStamp.checked = true;
             document.querySelectorAll('.stamp-item').forEach(s=>s.classList.remove('selected'));
             item.classList.add('selected');
             selectedStamp = i;
-        }
+        };
     }
 
     uploadBtn.onclick = ()=>{
@@ -294,7 +290,7 @@
 
             let box = document.createElement('div');
             box.className = 'result-box';
-            box.innerHTML = `<img class="result-img" src="${url}"><img class="frame-overlay" src="${frameFile}">`;
+            box.innerHTML = `<img class="result-img" src="${url}"><img class="frame-overlay" src="${frameFile}?${Math.random()}">`;
             resultContainer.appendChild(box);
         }
 
@@ -322,39 +318,35 @@
     };
 
     async function processImg(file){
-        return new Promise((resolve) => {
+        return new Promise(async (resolve) => {
             let img = new Image();
             img.crossOrigin = "anonymous";
-            img.onload = ()=>{
-                if(!useStamp.checked || !selectedStamp){
-                    let canvas = document.createElement('canvas');
-                    let ctx = canvas.getContext('2d');
-                    canvas.width = 450;
-                    canvas.height = 700;
-                    let scale = Math.max(canvas.width/img.width, canvas.height/img.height);
-                    let w = img.width*scale, h = img.height*scale;
-                    ctx.drawImage(img, (canvas.width-w)/2, (canvas.height-h)/2, w, h);
-                    canvas.toBlob(resolve, 'image/png');
-                    return;
-                }
-                let stamp = new Image();
-                stamp.crossOrigin = "anonymous";
-                stamp.onload = ()=>{
-                    let canvas = document.createElement('canvas');
-                    let ctx = canvas.getContext('2d');
-                    canvas.width = 450;
-                    canvas.height = 700;
-                    let scale = Math.max(canvas.width/img.width, canvas.height/img.height);
-                    let w = img.width*scale, h = img.height*scale;
-                    ctx.drawImage(img, (canvas.width-w)/2, (canvas.height-h)/2, w, h);
+            
+            img.onload = async ()=>{
+                let canvas = document.createElement('canvas');
+                let ctx = canvas.getContext('2d');
+                canvas.width = 450;
+                canvas.height = 700;
+                
+                let scale = Math.max(canvas.width/img.width, canvas.height/img.height);
+                let w = img.width*scale, h = img.height*scale;
+                ctx.drawImage(img, (canvas.width-w)/2, (canvas.height-h)/2, w, h);
+
+                if(useStamp.checked && selectedStamp){
+                    let stamp = new Image();
+                    stamp.crossOrigin = "anonymous";
+                    await new Promise((res) => {
+                        stamp.onload = res;
+                        stamp.src = selectedStamp + '.png?'+Math.random();
+                    });
+                    
                     let sw = canvas.width * 0.85;
                     let sh = stamp.height/stamp.width * sw;
                     let sx = (canvas.width - sw)/2;
                     let sy = (canvas.height - sh)/2 + sh*0.5 + 30;
                     ctx.drawImage(stamp, sx, sy, sw, sh);
-                    canvas.toBlob(resolve, 'image/png');
-                };
-                stamp.src = selectedStamp + '.png';
+                }
+                canvas.toBlob(resolve, 'image/png');
             };
             img.src = URL.createObjectURL(file);
         });
