@@ -29,7 +29,7 @@
             --text-secondary: #666666;
             --card-bg: rgba(255, 255, 255, 0.25);
             --card-border: rgba(255, 255, 255, 0.3);
-            --tidal-gradient: #E5E7EB; /* 改成灰色背景 */
+            --tidal-gradient: #E5E7EB;
         }
 
         [data-theme="dark"] {
@@ -39,7 +39,7 @@
             --text-secondary: #aaaaaa;
             --card-bg: rgba(20, 20, 35, 0.25);
             --card-border: rgba(255, 255, 255, 0.15);
-            --tidal-gradient: #1F2937; /* 深色灰色背景 */
+            --tidal-gradient: #1F2937;
         }
 
         body {
@@ -137,6 +137,12 @@
             z-index: 2;
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
+            transition: all 0.2s ease;
+        }
+
+        .post-card:active {
+            transform: scale(0.94);
+            transition: transform 0.1s ease;
         }
 
         .post-card:nth-child(1) { animation-delay: 0.2s; }
@@ -196,7 +202,7 @@
         <div class="posts">
             <div class="post-card" onclick="bounceThis(this); location.href='海报自定义工具.html'">海报自定义工具</div>
             <div class="post-card" onclick="bounceThis(this); window.open('https://jcn101cvl5dk.feishu.cn/wiki/D9V4wqJgviIYXuka2KHcUXJ2nie','_blank')">前往我的海报图库</div>
-            <div class="post-card" onclick="bounceThis(this)">功能三</div>
+            <div class="post-card" onclick="bounceThis(this); window.open('https://www.91m.top','_blank')">苏苏荣耀助手（可查战区）</div>
         </div>
     </div>
     <script>
