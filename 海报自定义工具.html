@@ -35,79 +35,61 @@
             --text-sub: rgba(255, 255, 255, 0.5);
         }
 
+        /* 基础样式重置 */
         * {
             margin: 0; padding: 0; box-sizing: border-box;
             -webkit-tap-highlight-color: transparent !important;
             font-family: 'LiCN-Custom', -apple-system, sans-serif !important;
-            transition: background 0.4s ease, color 0.4s ease, border 0.4s ease;
+        }
+
+        /* 仅对背景颜色和边框进行过渡，避免文字颜色切换延迟 */
+        body, .section, .icon-btn, .result-card, .modal-content, .upload-btn {
+            transition: background 0.3s ease, border-color 0.3s ease;
         }
 
         body { 
             background-color: var(--ios-bg);
-            background-image: 
-                linear-gradient(var(--grid-line) 1px, transparent 1px),
-                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-            background-size: 30px 30px;
-            background-attachment: fixed;
-            padding: 15px; 
-            color: var(--text-main); 
-            min-height: 100vh; 
+            background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 30px 30px; background-attachment: fixed;
+            padding: 15px; color: var(--text-main); min-height: 100vh; 
         }
 
-        /* 顶部导航栏容器 */
-        .nav-bar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin: 10px 5px 25px;
-        }
+        .container { max-width: 420px; margin: 0 auto; position: relative; }
 
-        /* 统一图标按钮样式 */
+        /* 导航栏 */
+        .nav-bar { display: flex; align-items: center; justify-content: space-between; margin: 10px 5px 25px; }
         .icon-btn {
-            width: 42px; height: 42px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid var(--glass-border);
-            border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
+            width: 42px; height: 42px; background: var(--glass-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border); border-radius: 14px; display: flex; align-items: center; justify-content: center;
             cursor: pointer; color: var(--text-main);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
-
         .nav-bar h1 { font-size: 22px; font-weight: 900; letter-spacing: -1px; }
 
-        .mode-icon {
-            width: 16px; height: 16px; border-radius: 50%;
-            border: 2px solid var(--text-main); position: relative;
-        }
-        .dark-mode .mode-icon {
-            background: var(--text-main);
-            box-shadow: -4px -3px 0 0 var(--ios-bg) inset;
-            border: none;
-        }
+        .mode-icon { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--text-main); position: relative; }
+        .dark-mode .mode-icon { background: var(--text-main); box-shadow: -4px -3px 0 0 var(--ios-bg) inset; border: none; }
 
+        /* 通用卡片容器 */
         .section { 
-            background: var(--glass-bg); 
-            backdrop-filter: blur(20px) saturate(160%);
-            -webkit-backdrop-filter: blur(20px) saturate(160%);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-md); 
-            padding: 15px; 
-            margin-bottom: 15px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.02); 
+            background: var(--glass-bg); backdrop-filter: blur(20px) saturate(160%); border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md); padding: 15px; margin-bottom: 15px; 
         }
 
-        .section h2 { font-size: 14px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
+        /* 选项布局 */
+        .option-row { display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+        .option-row:active .switch .slider { opacity: 0.8; }
+        .label-text { font-size: 15px; font-weight: 700; }
+        .sub-text { font-size: 11px; color: var(--text-sub); }
 
-        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+        /* 开关样式 */
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; pointer-events: none; }
         .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #d1d1d6; transition: .3s; border-radius: 30px; }
+        .slider { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #d1d1d6; transition: .3s; border-radius: 30px; }
         .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 2px; bottom: 2px; background-color: white; transition: .3s; border-radius: 50%; }
         input:checked + .slider { background-color: var(--ios-green); }
         input:checked + .slider:before { transform: translateX(20px); }
 
-        .stamp-wrap { overflow: hidden; height: 68px; opacity: 0.9; transform-origin: top; transition: height 0.4s var(--smooth-curve); }
+        /* 限定标样式 */
+        .stamp-wrap { overflow: hidden; height: 68px; opacity: 0.9; transition: height 0.4s var(--smooth-curve); }
         .stamp-wrap.expand { height: 165px; opacity: 1; }
         .stamp-list { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
         .stamp-item { 
@@ -116,26 +98,43 @@
         }
         .stamp-item.selected { border-color: var(--ios-accent); background: var(--glass-bg); box-shadow: 0 0 0 1px var(--ios-accent); }
         .stamp-item img { max-width: 80%; max-height: 80%; object-fit: contain; }
+        .expand-btn { width: 100%; padding: 8px; margin-top: 8px; background: rgba(120,120,120,0.08); border: none; border-radius: 10px; color: var(--ios-accent); font-size: 11px; font-weight: 800; }
 
-        .expand-btn { width: 100%; padding: 8px; margin-top: 5px; background: rgba(120,120,120,0.08); border: none; border-radius: 10px; color: var(--ios-accent); font-size: 11px; font-weight: 800; }
-
-        .upload-btn { width: 100%; padding: 14px; border: 1.5px dashed var(--ios-accent); border-radius: var(--radius-sm); color: var(--ios-accent); font-weight: 700; background: rgba(0,122,255,0.03); }
-
+        /* 按钮 */
+        .upload-btn { width: 100%; padding: 14px; border: 1.5px dashed var(--ios-accent); border-radius: var(--radius-sm); color: var(--ios-accent); font-weight: 700; background: rgba(0,122,255,0.03); cursor: pointer; }
         .status-bar { width: 100%; padding: 12px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; text-align: center; background: #e5e5ea; color: #8e8e93; display: none; margin-top: 10px; }
         .status-bar.active { background: var(--ios-accent); color: #fff; display: block; }
-        .download-btn { width: 100%; padding: 14px; border: none; border-radius: var(--radius-sm); background: var(--ios-green); color: #fff; font-weight: 700; display: none; margin-top: 10px; }
+        .download-btn { width: 100%; padding: 14px; border: none; border-radius: var(--radius-sm); background: var(--ios-green); color: #fff; font-weight: 700; display: none; margin-top: 10px; cursor: pointer; }
 
+        /* 预览区域 */
         #resultContainer { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 15px; }
-        .result-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 14px; padding: 8px; }
-        .poster-box { width: 100%; aspect-ratio: 450/700; border-radius: 8px; overflow: hidden; position: relative; background: #333; }
+        .result-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 14px; padding: 8px; animation: fadeIn 0.4s ease; }
+        
+        /* 核心预览框逻辑 */
+        .poster-box { 
+            width: 100%; aspect-ratio: 450/700; border-radius: 8px; overflow: hidden; 
+            position: relative; /* 绝对定位基准 */
+            background: #333; 
+        }
+        .poster-img { width: 100%; height: 100%; object-fit: cover; }
+        
+        /* 边框覆盖层：仅用于预览，不影响下载 */
+        .border-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; /* 穿透点击 */
+            z-index: 10;
+            object-fit: fill;
+        }
+
         .info-time { color: var(--text-sub); font-size: 10px; margin-top: 6px; text-align: center; font-weight: 600; }
 
-        /* 弹窗抽屉 */
+        /* 弹窗 */
         .settings-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; z-index: 2000; backdrop-filter: blur(8px); }
-        .modal-content { position: absolute; bottom: 30px; left: 15px; right: 15px; background: var(--glass-bg); border-radius: 24px; padding: 20px; border: 1px solid var(--glass-border); animation: slideUp 0.4s var(--smooth-curve); }
-        .size-option { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 0.5px solid rgba(120,120,120,0.1); font-weight: 700; color: var(--text-main); }
+        .modal-content { position: absolute; bottom: 30px; left: 15px; right: 15px; background: var(--glass-bg); border-radius: 24px; padding: 20px; border: 1px solid var(--glass-border); animation: slideUp 0.3s var(--smooth-curve); }
+        .size-option { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 0.5px solid rgba(120,120,120,0.1); font-weight: 700; color: var(--text-main); cursor: pointer; }
         .size-option.active { color: var(--ios-accent); background: rgba(0,122,255,0.05); border-radius: 10px; }
         
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
@@ -153,16 +152,19 @@
     </div>
     
     <div class="section">
-        <h2>使用限定标 <label class="switch"><input type="checkbox" id="useStamp"><span class="slider"></span></label></h2>
+        <div class="option-row" id="stampToggleBox" style="margin-bottom:12px;">
+            <div><p class="label-text">使用限定标</p><p class="sub-text">勾选后在中心叠加样式</p></div>
+            <label class="switch"><input type="checkbox" id="useStamp"><span class="slider"></span></label>
+        </div>
         <div class="stamp-wrap" id="stampWrap"><div class="stamp-list" id="stampList"></div></div>
         <button class="expand-btn" id="expandBtn">展开样式 ▾</button>
     </div>
 
     <div class="section">
-        <div class="preview-area" id="previewArea" style="display:flex;gap:6px;margin-bottom:10px;"></div>
-        <button class="upload-btn" id="uploadBtn">选择图片</button>
+        <div class="preview-area" id="previewArea" style="display:flex;gap:6px;margin-bottom:10px;overflow:hidden;height:40px;"></div>
+        <button class="upload-btn" id="uploadBtn">选择图片并开始处理</button>
         <div id="statusBar" class="status-bar">正在处理...</div>
-        <button class="download-btn" id="downloadBtn">立即下载</button>
+        <button class="download-btn" id="downloadBtn">一键保存所有</button>
     </div>
 
     <div id="resultContainer"></div>
@@ -171,24 +173,21 @@
 <div class="settings-overlay" id="settingsOverlay">
     <div class="modal-content">
         <h3 style="margin-bottom:15px; font-size:16px; text-align:center; color:var(--text-sub);">输出尺寸</h3>
-        <div class="size-option" data-w="450" data-h="700"><span>标准</span><span>450x700</span></div>
-        <div class="size-option" data-w="180" data-h="280"><span>迷你</span><span>180x280</span></div>
-        <div class="size-option" data-w="900" data-h="1400"><span>超高清</span><span>900x1400</span></div>
+        <div class="size-option" data-w="450" data-h="700"><span>标准</span><span>450 x 700</span></div>
+        <div class="size-option" data-w="180" data-h="280"><span>迷你</span><span>180 x 280</span></div>
+        <div class="size-option" data-w="900" data-h="1400"><span>超高清</span><span>900 x 1400</span></div>
         <button id="closeBtn" style="width:100%; padding:15px; background:rgba(120,120,120,0.1); border:none; border-radius:14px; margin-top:15px; font-weight:800; color:var(--ios-accent);">完成</button>
     </div>
 </div>
 
 <script>
-    function applyTheme(theme) {
-        document.body.classList.toggle('dark-mode', theme === 'dark');
-    }
+    function applyTheme(theme) { document.body.classList.toggle('dark-mode', theme === 'dark'); }
     function toggleTheme() {
         const isDark = document.body.classList.toggle('dark-mode');
         localStorage.setItem('licn-theme', isDark ? 'dark' : 'light');
         if (window.navigator.vibrate) window.navigator.vibrate(5);
     }
-    const savedTheme = localStorage.getItem('licn-theme');
-    if (savedTheme) applyTheme(savedTheme);
+    if (localStorage.getItem('licn-theme')) applyTheme(localStorage.getItem('licn-theme'));
 
     let currentW = localStorage.getItem('posterW') || 450;
     let currentH = localStorage.getItem('posterH') || 700;
@@ -198,40 +197,48 @@
     let activeObjectURLs = [];
 
     const overlay = document.getElementById('settingsOverlay');
+    const stampCheck = document.getElementById('useStamp');
+    const stampToggleBox = document.getElementById('stampToggleBox');
+
     document.getElementById('openSettings').onclick = () => overlay.style.display = 'block';
-    overlay.onclick = (e) => { if (e.target === overlay) overlay.style.display = 'none'; };
-    document.getElementById('closeBtn').onclick = () => overlay.style.display = 'none';
+    document.getElementById('closeBtn').onclick = () => { overlay.style.display = 'none'; if(uploadedFiles.length > 0) autoProcess(); };
 
     document.querySelectorAll('.size-option').forEach(opt => {
         if(opt.dataset.w == currentW) opt.classList.add('active');
-        opt.onclick = async () => {
+        opt.onclick = () => {
             document.querySelectorAll('.size-option').forEach(o => o.classList.remove('active'));
             opt.classList.add('active');
             currentW = opt.dataset.w; currentH = opt.dataset.h;
             localStorage.setItem('posterW', currentW); localStorage.setItem('posterH', currentH);
-            if(uploadedFiles.length > 0) await autoProcess();
+            if (window.navigator.vibrate) window.navigator.vibrate(5);
         };
     });
 
+    // 限定标列表生成
     const stampList = document.getElementById('stampList');
-    const stampCheck = document.getElementById('useStamp');
     for(let i=1; i<=10; i++){
         let item = document.createElement('div');
         item.className = 'stamp-item';
-        item.innerHTML = `<img src="限定${i}.png">`;
+        item.innerHTML = `<img src="限定${i}.png" onerror="this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='">`;
         stampList.appendChild(item);
-        item.onclick = async () => {
+        item.onclick = () => {
             document.querySelectorAll('.stamp-item').forEach(s=>s.classList.remove('selected'));
             item.classList.add('selected');
             selectedStampNum = i; stampCheck.checked = true;
-            if(uploadedFiles.length > 0) await autoProcess(); 
+            if (window.navigator.vibrate) window.navigator.vibrate(5);
+            if(uploadedFiles.length > 0) autoProcess(); 
         };
     }
+
+    stampToggleBox.onclick = () => {
+        stampCheck.checked = !stampCheck.checked;
+        if (window.navigator.vibrate) window.navigator.vibrate(5);
+        if(uploadedFiles.length > 0) autoProcess();
+    };
 
     const uploadBtn = document.getElementById('uploadBtn');
     const statusBar = document.getElementById('statusBar');
     const dlBtn = document.getElementById('downloadBtn');
-    const previewArea = document.getElementById('previewArea');
     const fileInput = document.createElement('input');
     fileInput.type = 'file'; fileInput.multiple = true; fileInput.accept = 'image/*';
     uploadBtn.onclick = () => fileInput.click();
@@ -239,11 +246,12 @@
     fileInput.onchange = async (e) => {
         uploadedFiles = Array.from(e.target.files);
         if(uploadedFiles.length === 0) return;
+        const previewArea = document.getElementById('previewArea');
         previewArea.innerHTML = '';
         uploadedFiles.forEach(f => {
             const reader = new FileReader();
             reader.onload = (ev) => {
-                previewArea.innerHTML += `<div style="width:50px;height:50px;border-radius:10px;overflow:hidden;border:1px solid var(--glass-border)"><img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;"></div>`;
+                previewArea.innerHTML += `<div style="min-width:40px;height:40px;border-radius:6px;overflow:hidden;border:1px solid var(--glass-border)"><img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;"></div>`;
             };
             reader.readAsDataURL(f);
         });
@@ -267,12 +275,19 @@
             
             const card = document.createElement('div');
             card.className = 'result-card';
-            card.innerHTML = `<div class="poster-box"><img src="${url}" style="width:100%;height:100%;object-fit:cover;"><img src="边框.png" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;"></div><div class="info-time">已生成</div>`;
+            // 重点：这里预览带边框，但 blob 本身不含边框
+            card.innerHTML = `
+                <div class="poster-box">
+                    <img src="${url}" class="poster-img">
+                    <img src="./边框.png" class="border-overlay" onerror="this.style.opacity='0'; console.warn('未发现边框.png')">
+                </div>
+                <div class="info-time">生成成功</div>
+            `;
             container.appendChild(card);
         }
         statusBar.innerText = "处理完成";
         dlBtn.style.display = 'block';
-        setTimeout(() => { uploadBtn.style.display = 'block'; statusBar.style.display = 'none'; }, 2000);
+        setTimeout(() => { uploadBtn.style.display = 'block'; statusBar.style.display = 'none'; }, 1500);
     }
 
     async function processImg(file) {
@@ -287,16 +302,17 @@
                 const scale = Math.max(canvas.width/img.width, canvas.height/img.height);
                 const w = img.width * scale, h = img.height * scale;
                 ctx.drawImage(img, (canvas.width-w)/2, (canvas.height-h)/2, w, h);
+                
                 if(stampCheck.checked && selectedStampNum) {
                     const stamp = new Image();
                     stamp.src = `限定${selectedStampNum}.png`; 
-                    await new Promise(r => { stamp.onload = r; });
+                    await new Promise(r => { stamp.onload = r; stamp.onerror = r; });
                     const sw = canvas.width * 0.85;
                     const sh = (stamp.height/stamp.width) * sw;
                     ctx.drawImage(stamp, (canvas.width-sw)/2, (canvas.height-sh)/2 + (canvas.height*0.07), sw, sh);
                 }
                 URL.revokeObjectURL(src);
-                canvas.toBlob(resolve, 'image/png');
+                canvas.toBlob(resolve, 'image/png', 0.92);
             };
         });
     }
@@ -305,10 +321,10 @@
         allBlobs.forEach((blob, i) => {
             setTimeout(() => {
                 const a = document.createElement('a');
-                a.href = activeObjectURLs[i];
+                a.href = URL.createObjectURL(blob);
                 a.download = `Poster_${i+1}.png`;
                 a.click();
-            }, i * 250);
+            }, i * 300);
         });
     };
 
@@ -316,7 +332,6 @@
     document.getElementById('expandBtn').onclick = function() {
         const isExp = stampWrap.classList.toggle('expand');
         this.innerText = isExp ? '收起样式 ▲' : '展开样式 ▾';
-        stampWrap.style.height = isExp ? '165px' : '68px';
     };
 </script>
 </body>
