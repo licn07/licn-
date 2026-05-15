@@ -12,233 +12,230 @@
         }
 
         :root {
-            --ios-bg: #f2f2f7;
+            --ios-bg: #F5F5F7;
+            --grid-line: rgba(0, 122, 255, 0.05);
             --ios-accent: #007aff;
             --ios-green: #34c759;
-            --radius-md: 18px;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --text-main: #1D1D1F;
+            --text-sub: #8e8e93;
+            --radius-md: 20px;
             --radius-sm: 12px;
+            --smooth-curve: cubic-bezier(0.25, 0.1, 0.25, 1);
         }
 
-        * {
-            margin: 0; padding: 0; box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            font-family: 'LiCN-Custom', -apple-system, sans-serif !important;
+        .dark-mode {
+            --ios-bg: #050505;
+            --grid-line: rgba(255, 255, 255, 0.05);
+            --ios-accent: #00CCFF;
+            --glass-bg: rgba(28, 28, 30, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-sub: rgba(255, 255, 255, 0.5);
         }
 
-        body { background: var(--ios-bg); padding: 12px; color: #000; min-height: 100vh; }
-        .container { max-width: 420px; margin: 0 auto; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'LiCN-Custom', -apple-system, sans-serif !important; }
+
+        /* 仅对背景和边框做过渡，文字颜色 (color) 不加 transition 以保证切换速度 */
+        body, .section, .icon-btn, .result-card, .modal-content { transition: background 0.25s ease, border-color 0.25s ease; }
+
+        body { 
+            background-color: var(--ios-bg);
+            background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 30px 30px; background-attachment: fixed; padding: 15px; color: var(--text-main); min-height: 100vh; 
+        }
+
+        .container { max-width: 420px; margin: 0 auto; position: relative; }
+        .nav-bar { display: flex; align-items: center; justify-content: space-between; margin: 10px 5px 25px; }
+        .icon-btn {
+            width: 42px; height: 42px; background: var(--glass-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border); border-radius: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-main);
+        }
+        .nav-bar h1 { font-size: 22px; font-weight: 900; letter-spacing: -1px; }
+
+        .mode-icon { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--text-main); position: relative; }
+        .dark-mode .mode-icon { background: var(--text-main); box-shadow: -4px -3px 0 0 var(--ios-bg) inset; border: none; }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px) saturate(160%); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: 15px; margin-bottom: 15px; }
         
-        .header { margin: 10px 0 15px 5px; }
-        .header h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
-
-        .section {
-            background: #fff; border-radius: var(--radius-md);
-            padding: 14px; margin-bottom: 12px;
-            box-shadow: 0 1px 10px rgba(0,0,0,0.02);
+        /* 移除 active 缩放，保持文字不动 */
+        .clickable-row { 
+            display: flex; align-items: center; justify-content: space-between; 
+            cursor: pointer; user-select: none;
         }
 
-        .control-row { display: flex; align-items: center; justify-content: space-between; }
-        .label-text { font-size: 15px; font-weight: 600; }
-        .sub-text { font-size: 11px; color: #8e8e93; }
+        .label-text { font-size: 15px; font-weight: 700; }
+        .sub-text { font-size: 11px; color: var(--text-sub); }
 
-        /* iOS 开关 */
-        .switch { position: relative; display: inline-block; width: 44px; height: 26px; }
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; pointer-events: none; } 
         .switch input { opacity: 0; width: 0; height: 0; }
-        .slider {
-            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #e9e9eb; transition: .4s; border-radius: 30px;
-        }
-        .slider:before {
-            position: absolute; content: ""; height: 22px; width: 22px; left: 2px; bottom: 2px;
-            background-color: white; transition: .4s; border-radius: 50%;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #d1d1d6; transition: .4s; border-radius: 30px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
         input:checked + .slider { background-color: var(--ios-green); }
-        input:checked + .slider:before { transform: translateX(18px); }
+        input:checked + .slider:before { transform: translateX(20px); }
 
-        /* 预览区一排显示 */
-        .preview-wrapper { position: relative; margin-bottom: 10px; }
-        .preview-area { 
-            display: flex; flex-wrap: wrap; gap: 6px; 
-            overflow: hidden; height: 42px; 
-            transition: height 0.3s ease;
-        }
-        .preview-area.expanded { height: auto; min-height: 42px; }
+        .preview-area { display: flex; flex-wrap: wrap; gap: 8px; overflow: hidden; height: 44px; transition: height 0.3s var(--smooth-curve); }
+        .preview-box { width: 60px; height: 44px; border-radius: 8px; overflow: hidden; border: 1px solid var(--glass-border); background: rgba(120,120,120,0.1); }
         
-        .preview-box { width: 55px; height: 42px; border-radius: 6px; overflow: hidden; background: #eee; border: 0.5px solid #ddd; }
-        .preview-box img { width: 100%; height: 100%; object-fit: cover; }
+        .upload-btn { width: 100%; padding: 14px; border: 1.5px dashed var(--ios-accent); border-radius: var(--radius-sm); color: var(--ios-accent); font-weight: 700; background: rgba(0,122,255,0.03); margin: 15px 0 10px; cursor: pointer; }
+        .download-all-btn { width: 100%; padding: 14px; background: var(--ios-green); color: #fff; border: none; border-radius: var(--radius-sm); font-weight: 700; margin-top: 8px; display: none; cursor: pointer; }
+
+        #resultContainer { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 15px; }
+        .result-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 14px; padding: 8px; animation: fadeIn 0.4s ease; }
+
+        .settings-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; z-index: 2000; backdrop-filter: blur(8px); }
+        .modal-content { position: absolute; bottom: 30px; left: 15px; right: 15px; background: var(--glass-bg); border-radius: 24px; padding: 20px; border: 1px solid var(--glass-border); animation: slideUp 0.3s var(--smooth-curve); }
+        .size-option { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 0.5px solid rgba(120,120,120,0.1); font-weight: 700; color: var(--text-main); cursor: pointer; }
+        .size-option.active { color: var(--ios-accent); background: rgba(0,122,255,0.05); border-radius: 10px; }
         
-        .expand-toggle {
-            font-size: 11px; color: var(--ios-accent); font-weight: 600;
-            margin-top: 5px; display: none; text-align: right; cursor: pointer;
-        }
-
-        /* 按钮与状态 */
-        .upload-btn {
-            width: 100%; padding: 12px; border: 1.2px dashed #c7c7cc; border-radius: var(--radius-sm);
-            color: var(--ios-accent); font-size: 14px; margin-bottom: 10px;
-            background: #fbfbfd; font-weight: 600; cursor: pointer;
-        }
-
-        .status-btn {
-            width: 100%; padding: 13px; border: none; border-radius: var(--radius-sm);
-            font-size: 15px; font-weight: 700; text-align: center;
-            background: #e5e5ea; color: #8e8e93; display: none;
-        }
-        .status-btn.active { background: var(--ios-accent); color: #fff; display: block; }
-        .status-btn.done { background: var(--ios-green); color: #fff; }
-
-        .download-all-btn {
-            width: 100%; padding: 13px; border: none; border-radius: var(--radius-sm);
-            font-size: 15px; font-weight: 600; text-align: center;
-            background: var(--ios-green); color: #fff; margin-top: 10px; display: none;
-        }
-
-        /* 结果区域 */
-        #resultContainer { 
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; 
-        }
-        .result-card {
-            background: #fff; border-radius: 14px; padding: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; flex-direction: column;
-        }
-        .result-card img { width: 100%; aspect-ratio: 4/3; border-radius: 8px; object-fit: cover; margin-bottom: 6px; }
-        
-        .info-size { color: var(--ios-green); font-size: 12px; font-weight: 700; }
-        .info-time { color: #000; font-size: 9px; font-weight: 500; margin-bottom: 6px; }
-        
-        .dl-link { 
-            display: block; width: 100%; padding: 6px; background: #f2f2f7; border-radius: 6px;
-            color: var(--ios-accent); text-decoration: none; font-weight: 700; font-size: 11px; text-align: center;
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="header"><h1>名片剪切</h1></div>
-
-    <div class="section">
-        <div class="control-row">
-            <div>
-                <p class="label-text">极限压缩模式</p>
-                <p class="sub-text">关闭保持原像素 · 4:3</p>
-            </div>
-            <label class="switch">
-                <input type="checkbox" id="compressToggle">
-                <span class="slider"></span>
-            </label>
+    <div class="nav-bar">
+        <div class="icon-btn" id="openSettings">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1 2-2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </div>
+        <h1>名片剪切</h1>
+        <div class="icon-btn" onclick="toggleTheme()">
+            <div class="mode-icon"></div>
         </div>
     </div>
 
     <div class="section">
-        <div class="preview-wrapper">
-            <div class="preview-area" id="previewArea"></div>
-            <div class="expand-toggle" id="expandToggle">展开预览 ▾</div>
+        <div class="clickable-row" id="compressRow">
+            <div>
+                <p class="label-text">极限压缩模式</p>
+                <p class="sub-text">关闭保持原像素</p>
+            </div>
+            <label class="switch"><input type="checkbox" id="compressToggle"><span class="slider"></span></label>
         </div>
-        <button class="upload-btn" id="uploadBtn">选择图片 (选完自动处理)</button>
-        
-        <div id="statusBtn" class="status-btn">准备就绪</div>
-        <button id="downloadAllBtn" class="download-all-btn">一键下载所有</button>
+    </div>
+
+    <div class="section">
+        <div class="preview-area" id="previewArea"></div>
+        <button class="upload-btn" id="uploadBtn">选择名片原图</button>
+        <button class="download-all-btn" id="downloadAllBtn">一键批量下载</button>
     </div>
 
     <div id="resultContainer"></div>
 </div>
 
+<div class="settings-overlay" id="settingsOverlay">
+    <div class="modal-content">
+        <h3 style="margin-bottom:15px; font-size:16px; text-align:center; color:var(--text-sub);">剪切比例</h3>
+        <div class="size-option" data-ratio="1.333"><span>标准名片</span><span>4 : 3</span></div>
+        <div class="size-option" data-ratio="1.777"><span>横版展示</span><span>16 : 9</span></div>
+        <button id="closeBtn" style="width:100%; padding:15px; background:rgba(120,120,120,0.1); border:none; border-radius:14px; margin-top:15px; font-weight:800; color:var(--ios-accent);">确认保存</button>
+    </div>
+</div>
+
 <script>
+    function applyTheme(theme) { document.body.classList.toggle('dark-mode', theme === 'dark'); }
+    function toggleTheme() {
+        const isDark = document.body.classList.toggle('dark-mode');
+        localStorage.setItem('licn-theme', isDark ? 'dark' : 'light');
+        if (window.navigator.vibrate) window.navigator.vibrate(5);
+    }
+    if (localStorage.getItem('licn-theme')) applyTheme(localStorage.getItem('licn-theme'));
+
+    let currentRatio = parseFloat(localStorage.getItem('card-ratio')) || 1.333;
     let selectedFiles = [];
     let processedBlobs = [];
 
-    const uploadBtn = document.getElementById('uploadBtn');
-    const statusBtn = document.getElementById('statusBtn');
-    const dlBtn = document.getElementById('downloadAllBtn');
-    const previewArea = document.getElementById('previewArea');
-    const expandToggle = document.getElementById('expandToggle');
+    const overlay = document.getElementById('settingsOverlay');
+    const closeSettings = () => { 
+        overlay.style.display = 'none'; 
+        if(selectedFiles.length > 0) autoProcess(); 
+    };
+    document.getElementById('openSettings').onclick = () => overlay.style.display = 'block';
+    overlay.onclick = (e) => { if (e.target === overlay) closeSettings(); };
+    document.getElementById('closeBtn').onclick = closeSettings;
+
+    document.querySelectorAll('.size-option').forEach(opt => {
+        if(parseFloat(opt.dataset.ratio).toFixed(2) == currentRatio.toFixed(2)) opt.classList.add('active');
+        opt.onclick = () => {
+            document.querySelectorAll('.size-option').forEach(o => o.classList.remove('active'));
+            opt.classList.add('active');
+            currentRatio = parseFloat(opt.dataset.ratio);
+            localStorage.setItem('card-ratio', currentRatio);
+            if (window.navigator.vibrate) window.navigator.vibrate(5);
+        };
+    });
+
+    const compressRow = document.getElementById('compressRow');
+    const compressToggle = document.getElementById('compressToggle');
+    compressRow.onclick = () => {
+        compressToggle.checked = !compressToggle.checked;
+        if (window.navigator.vibrate) window.navigator.vibrate(5);
+        if(selectedFiles.length > 0) autoProcess();
+    };
+
     const fileInput = document.createElement('input');
     fileInput.type = 'file'; fileInput.multiple = true; fileInput.accept = 'image/*';
+    document.getElementById('uploadBtn').onclick = () => fileInput.click();
     
-    uploadBtn.onclick = () => fileInput.click();
-    
-    // --- 核心修改：文件改变后立刻自动处理 ---
-    fileInput.onchange = async (e) => {
+    fileInput.onchange = (e) => {
         selectedFiles = Array.from(e.target.files);
-        if (selectedFiles.length === 0) return;
-
-        processedBlobs = [];
-        dlBtn.style.display = 'none';
+        if(selectedFiles.length === 0) return;
+        const previewArea = document.getElementById('previewArea');
         previewArea.innerHTML = '';
-        document.getElementById('resultContainer').innerHTML = '';
-        
-        // 1. 显示预览
         selectedFiles.forEach(file => {
             const reader = new FileReader();
             reader.onload = (ev) => {
-                const box = document.createElement('div');
-                box.className = 'preview-box';
-                box.innerHTML = `<img src="${ev.target.result}">`;
-                previewArea.appendChild(box);
+                previewArea.innerHTML += `<div class="preview-box"><img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;"></div>`;
             };
             reader.readAsDataURL(file);
         });
-
-        setTimeout(() => {
-            expandToggle.style.display = previewArea.scrollHeight > 45 ? 'block' : 'none';
-        }, 100);
-
-        // 2. 自动启动处理流程
-        await autoProcessAll();
+        autoProcess();
     };
 
-    async function autoProcessAll() {
-        const total = selectedFiles.length;
-        const isCompress = document.getElementById('compressToggle').checked;
+    async function autoProcess() {
         const container = document.getElementById('resultContainer');
-        
-        statusBtn.style.display = 'block';
-        statusBtn.className = 'status-btn active';
-        uploadBtn.style.display = 'none'; // 处理时隐藏上传按钮，防止混乱
+        const dlBtn = document.getElementById('downloadAllBtn');
+        container.innerHTML = ''; processedBlobs = [];
 
-        for(let i = 0; i < total; i++) {
-            statusBtn.innerText = `正在自动处理 ${i + 1}/${total}`;
-            const file = selectedFiles[i];
-            const { blob } = await cropImage(file, isCompress);
+        for(let i = 0; i < selectedFiles.length; i++) {
+            const { blob } = await cropImage(selectedFiles[i], compressToggle.checked, currentRatio);
             const url = URL.createObjectURL(blob);
-            const sizeKB = (blob.size / 1024).toFixed(1);
-            
-            processedBlobs.push({ blob, name: `LICN_${file.name}` });
-            
-            const d = new Date();
-            const timeStr = `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}`;
+            processedBlobs.push({ blob, name: `LICN_${selectedFiles[i].name}` });
             
             const card = document.createElement('div');
             card.className = 'result-card';
-            card.innerHTML = `
-                <img src="${url}">
-                <p class="info-size">${sizeKB} KB</p>
-                <p class="info-time">${timeStr}</p>
-                <a href="${url}" download="LICN_${file.name}" class="dl-link">下载单个</a>
-            `;
+            card.innerHTML = `<img src="${url}" style="width:100%;aspect-ratio:${currentRatio};object-fit:cover;border-radius:8px;margin-bottom:8px;"><p class="info-size">${(blob.size/1024).toFixed(1)} KB</p><a href="${url}" download="LICN_${selectedFiles[i].name}" style="display:block;text-align:center;padding:8px;background:rgba(120,120,120,0.1);border-radius:8px;color:var(--ios-accent);text-decoration:none;font-weight:800;font-size:11px;margin-top:8px;">保存单个</a>`;
             container.appendChild(card);
-            await new Promise(r => setTimeout(r, 10)); // 保证UI平滑更新
         }
-
-        statusBtn.innerText = "处理完成 √";
-        statusBtn.className = 'status-btn active done';
-        dlBtn.style.display = 'block';
-        
-        // 3秒后恢复上传按钮，方便下一次操作
-        setTimeout(() => {
-            uploadBtn.style.display = 'block';
-            statusBtn.style.display = 'none';
-        }, 3000);
+        dlBtn.style.display = processedBlobs.length > 0 ? 'block' : 'none';
     }
 
-    expandToggle.onclick = () => {
-        const isExpanded = previewArea.classList.toggle('expanded');
-        expandToggle.innerText = isExpanded ? '收起预览 ▲' : '展开预览 ▾';
-    };
+    async function cropImage(file, compress, ratio) {
+        return new Promise(resolve => {
+            const img = new Image();
+            img.src = URL.createObjectURL(file);
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                let sw, sh, sx, sy;
+                if (img.width / img.height > ratio) {
+                    sh = img.height; sw = img.height * ratio;
+                    sx = (img.width - sw) / 2; sy = 0;
+                } else {
+                    sw = img.width; sh = img.width / ratio;
+                    sx = 0; sy = (img.height - sh) / 2;
+                }
+                canvas.width = compress ? 1000 : sw;
+                canvas.height = canvas.width / ratio;
+                ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+                canvas.toBlob((blob) => { URL.revokeObjectURL(img.src); resolve({ blob }); }, 'image/jpeg', compress ? 0.6 : 0.92);
+            };
+        });
+    }
 
-    dlBtn.onclick = function() {
+    document.getElementById('downloadAllBtn').onclick = () => {
         processedBlobs.forEach((item, index) => {
             setTimeout(() => {
                 const a = document.createElement('a');
@@ -248,31 +245,6 @@
             }, index * 250);
         });
     };
-
-    async function cropImage(file, compress) {
-        return new Promise(resolve => {
-            const img = new Image();
-            img.src = URL.createObjectURL(file);
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                const targetRatio = 4 / 3;
-                let sw, sh, sx, sy;
-                if (img.width / img.height > targetRatio) {
-                    sh = img.height; sw = img.height * targetRatio;
-                    sx = (img.width - sw) / 2; sy = 0;
-                } else {
-                    sw = img.width; sh = img.width / targetRatio;
-                    sx = 0; sy = (img.height - sh) / 2;
-                }
-                let dw = compress ? 1000 : sw;
-                let dh = compress ? (1000 / targetRatio) : sh;
-                canvas.width = dw; canvas.height = dh;
-                ctx.drawImage(img, sx, sy, sw, sh, 0, 0, dw, dh);
-                canvas.toBlob((blob) => resolve({ blob }), 'image/jpeg', compress ? 0.6 : 0.92);
-            };
-        });
-    }
 </script>
 </body>
 </html>

@@ -12,184 +12,178 @@
         }
 
         :root {
-            --glass: rgba(0, 0, 0, 0.45); 
-            --glass-border: rgba(255, 255, 255, 0.15);
+            --ios-blue: #007AFF;
+            --bg-color: #F5F5F7;
+            --grid-line: rgba(0, 122, 255, 0.05);
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --card-border: rgba(255, 255, 255, 0.8);
+            --text-main: #1D1D1F;
+            --text-sub: rgba(0, 0, 0, 0.5);
+            --shadow: 0 10px 30px rgba(0,0,0,0.03);
+            --toggle-bg: rgba(0, 0, 0, 0.05);
+        }
+
+        /* 仅在手动触发时激活 */
+        .dark-mode {
+            --ios-blue: #00CCFF;
+            --bg-color: #050505;
+            --grid-line: rgba(255, 255, 255, 0.05);
+            --card-bg: rgba(28, 28, 30, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
             --text-main: #ffffff;
+            --text-sub: rgba(255, 255, 255, 0.5);
+            --shadow: 0 10px 40px rgba(0,0,0,0.6);
+            --toggle-bg: rgba(255, 255, 255, 0.1);
         }
 
         * {
             margin: 0; padding: 0; box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
             font-family: 'SF-Pro', -apple-system, sans-serif !important;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         body {
-            background: var(--page-bg) no-repeat center center fixed;
-            background-size: cover;
+            background-color: var(--bg-color);
+            background-image: 
+                linear-gradient(var(--grid-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 30px 30px;
+            background-attachment: fixed;
             min-height: 100vh;
             display: flex;
-            align-items: center;
             justify-content: center;
-            padding: 20px;
-            overflow: hidden;
+            padding: 40px 20px;
         }
 
-        #particles {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 0; pointer-events: none;
+        /* 右上角环境切换 */
+        .theme-toggle {
+            position: fixed; top: 25px; right: 20px;
+            width: 44px; height: 44px;
+            background: var(--toggle-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 100; cursor: pointer;
         }
 
-        .container {
-            width: 100%;
-            max-width: 420px;
-            position: relative;
-            z-index: 10;
+        .mode-icon {
+            width: 18px; height: 18px; border-radius: 50%;
+            border: 2px solid var(--text-main); position: relative;
+        }
+        .dark-mode .mode-icon {
+            background: var(--text-main);
+            box-shadow: -5px -4px 0 0 var(--bg-color) inset;
+            border: none;
         }
 
-        header {
-            text-align: center;
-            margin-bottom: 40px;
+        .container { width: 100%; max-width: 420px; position: relative; z-index: 10; }
+
+        .brand-header { text-align: center; margin-bottom: 35px; padding-top: 20px; }
+        .brand-title {
+            font-size: 2.8rem; font-weight: 900; letter-spacing: -1.5px;
+            color: var(--text-main); margin-bottom: 4px;
+            background: linear-gradient(to bottom, var(--text-main) 60%, var(--text-sub) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .brand-subtitle {
+            font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 6px; color: var(--ios-blue); margin-left: 6px;
         }
 
-        header h1 {
-            font-size: 2.6rem;
-            font-weight: 900;
-            letter-spacing: -1px;
-            color: #fff;
-            text-shadow: 0 4px 15px rgba(0,0,0,0.6), 0 0 30px rgba(0,204,255,0.3);
+        .status-strip {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px;
         }
+        .status-node {
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 12px; padding: 10px 0; font-size: 0.65rem;
+            color: var(--text-sub); font-weight: bold; text-align: center;
+            box-shadow: var(--shadow);
+        }
+        .status-node b { color: var(--text-main); display: block; font-size: 0.85rem; margin-top: 2px; }
 
-        /* 分组样式 */
         .group-label {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.85rem;
-            font-weight: 700;
-            margin: 20px 0 10px 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            color: var(--text-sub); font-size: 0.75rem; font-weight: 800;
+            margin: 25px 0 12px 5px; text-transform: uppercase; letter-spacing: 1px;
+            display: flex; justify-content: space-between;
         }
 
-        .grid-box {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-bottom: 10px;
-        }
-
+        .grid-box { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
         .card {
-            background: var(--glass);
-            backdrop-filter: blur(50px) saturate(200%);
-            -webkit-backdrop-filter: blur(50px) saturate(200%);
-            border: 1px solid var(--glass-border);
-            border-radius: 22px;
-            padding: 30px 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-main);
-            text-decoration: none;
-            transition: all 0.3s cubic-bezier(0.2, 0, 0.2, 1);
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            background: var(--card-bg); backdrop-filter: blur(30px) saturate(150%);
+            -webkit-backdrop-filter: blur(30px) saturate(150%);
+            border: 1px solid var(--card-border); border-radius: 20px;
+            padding: 24px 10px; display: flex; align-items: center; justify-content: center;
+            color: var(--text-main); text-decoration: none; box-shadow: var(--shadow);
             text-align: center;
         }
-
-        .card span {
-            font-size: 0.95rem;
-            font-weight: 700;
-            line-height: 1.3;
-        }
-
-        .card:active {
-            transform: scale(0.94);
-            background: rgba(0, 0, 0, 0.6);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .container { animation: fadeIn 0.8s ease-out; }
+        .card span { font-size: 0.85rem; font-weight: 700; }
+        .card:active { transform: scale(0.96); opacity: 0.8; }
     </style>
 </head>
-<body>
-    <canvas id="particles"></canvas>
+<body id="mainBody">
+
+    <div class="theme-toggle" onclick="manualToggle()">
+        <div class="mode-icon"></div>
+    </div>
 
     <div class="container">
-        <header>
-            <h1>LiCN · 中枢</h1>
+        <header class="brand-header">
+            <div class="brand-title">LiCN · 中枢</div>
+            <div class="brand-subtitle">Adaptive</div>
         </header>
 
-        <div class="group-label">Poster Service / 海报服务</div>
-        <div class="grid-box">
-            <div class="card" onclick="location.href='海报自定义工具.html'">
-                <span>海报自定义工具</span>
-            </div>
-            <div class="card" onclick="window.open('https://jcn101cvl5dk.feishu.cn/wiki/D9V4wqJgviIYXuka2KHcUXJ2nie','_blank')">
-                <span>进入海报图库</span>
-            </div>
+        <div class="status-strip">
+            <div class="status-node">CPU <b id="cpu">0.0%</b></div>
+            <div class="status-node">RAM <b id="ram">0MB</b></div>
+            <div class="status-node">MODE <b id="mode-text">LIGHT</b></div>
         </div>
 
-        <div class="group-label">Card Service / 名片服务圈</div>
+        <div class="group-label">
+            <span>Poster Service</span>
+            <span style="opacity: 0.5;">海报服务</span>
+        </div>
         <div class="grid-box">
-            <div class="card" onclick="location.href='LICN名片工具.html'">
-                <span>名片剪切工具</span>
-            </div>
-            <div class="card" onclick="location.href='LICN名片图库.html'">
-                <span>进入名片图库</span>
-            </div>
+            <div class="card" onclick="location.href='海报自定义工具.html'"><span>海报自定义工具</span></div>
+            <div class="card" onclick="window.open('https://jcn101cvl5dk.feishu.cn/wiki/D9V4wqJgviIYXuka2KHcUXJ2nie')"><span>进入海报图库</span></div>
         </div>
 
-        <div class="group-label">External / 外部助手</div>
+        <div class="group-label">
+            <span>Card Service</span>
+            <span style="opacity: 0.5;">名片服务</span>
+        </div>
         <div class="grid-box">
-            <div class="card" style="grid-column: span 2; padding: 20px;" onclick="window.open('https://www.91m.top','_blank')">
-                <span>苏苏荣耀助手</span>
-            </div>
+            <div class="card" onclick="location.href='LICN名片工具.html'"><span>名片剪切工具</span></div>
+            <div class="card" onclick="location.href='LICN名片图库.html'"><span>进入名片图库</span></div>
+        </div>
+
+        <div class="group-label">
+            <span>External</span>
+            <span style="opacity: 0.5;">外部助手</span>
+        </div>
+        <div class="grid-box">
+            <div class="card" style="grid-column: span 2; padding: 20px;" onclick="window.open('https://www.91m.top')"><span>苏苏荣耀助手</span></div>
         </div>
     </div>
 
     <script>
-        const canvas = document.getElementById('particles');
-        const ctx = canvas.getContext('2d');
-        let w, h, particles = [];
-        function setSize() {
-            w = window.innerWidth; h = window.innerHeight;
-            canvas.width = w; canvas.height = h;
+        // 仅手动切换逻辑
+        function manualToggle() {
+            const isDark = document.body.classList.toggle('dark-mode');
+            document.getElementById('mode-text').innerText = isDark ? "DARK" : "LIGHT";
+            // 给 Android 16 用户一个小震动反馈
+            if (window.navigator.vibrate) window.navigator.vibrate(5);
         }
-        class Particle {
-            constructor() { this.init(); }
-            init() {
-                this.x = Math.random() * w;
-                this.y = Math.random() * h;
-                this.size = Math.random() * 1.5;
-                this.speedX = (Math.random() - 0.5) * 0.2;
-                this.speedY = (Math.random() - 0.5) * 0.2;
-                this.alpha = Math.random() * 0.3;
-            }
-            update() {
-                this.x += this.speedX; this.y += this.speedY;
-                if (this.x < 0 || this.x > w || this.y < 0 || this.y > h) this.init();
-            }
-            draw() {
-                ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
-                ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
-            }
-        }
-        function setup() {
-            setSize();
-            for (let i = 0; i < 50; i++) particles.push(new Particle());
-            window.addEventListener('resize', setSize);
-            loop();
-        }
-        function loop() {
-            ctx.clearRect(0, 0, w, h);
-            particles.forEach(p => { p.update(); p.draw(); });
-            requestAnimationFrame(loop);
-        }
-        setup();
-    </script>
 
-    <script>document.documentElement.style.setProperty('--page-bg', 'url("删")');</script>
+        // 模拟实时数据
+        function updateMetrics() {
+            document.getElementById('cpu').innerText = (Math.random() * 2 + 1.2).toFixed(1) + '%';
+            document.getElementById('ram').innerText = Math.floor(Math.random() * 30 + 1340) + 'MB';
+        }
+
+        setInterval(updateMetrics, 2000);
+        updateMetrics();
+    </script>
 </body>
 </html>
