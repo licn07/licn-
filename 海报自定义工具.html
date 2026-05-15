@@ -5,142 +5,169 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>LiCN · 海报自定义</title>
     <style>
-        @font-face {
-            font-family: 'LiCN-Custom';
-            src: url('Roboto.ttf') format('truetype');
-            font-weight: normal; font-style: normal; font-display: swap;
-        }
-
         :root {
-            --ios-bg: #F5F5F7;
-            --grid-line: rgba(0, 122, 255, 0.05);
+            --ios-bg: #F8F9FB;
+            --grid-line: #E5EEF9;
             --ios-accent: #007aff;
             --ios-green: #34c759;
-            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-bg: rgba(255, 255, 255, 0.75);
             --glass-border: rgba(255, 255, 255, 0.8);
+            --btn-bg: #ffffff;
             --text-main: #1d1d1f;
             --text-sub: #8e8e93;
-            --radius-md: 20px;
-            --radius-sm: 12px;
+            --radius-md: 24px;
             --smooth-curve: cubic-bezier(0.25, 0.1, 0.25, 1);
         }
 
         .dark-mode {
             --ios-bg: #050505;
-            --grid-line: rgba(255, 255, 255, 0.05);
+            --grid-line: #1a1a1a;
             --ios-accent: #00CCFF;
-            --glass-bg: rgba(28, 28, 30, 0.7);
+            --glass-bg: rgba(28, 28, 30, 0.8);
             --glass-border: rgba(255, 255, 255, 0.1);
+            --btn-bg: #1c1c1e;
             --text-main: #ffffff;
             --text-sub: rgba(255, 255, 255, 0.5);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'LiCN-Custom', -apple-system, sans-serif !important; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body { 
             background-color: var(--ios-bg);
             background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-            background-size: 30px 30px; background-attachment: fixed; padding: 15px; color: var(--text-main); min-height: 100vh; 
+            background-size: 25px 25px; font-family: -apple-system, sans-serif;
+            color: var(--text-main); height: 100vh; overflow: hidden; display: flex; flex-direction: column;
             transition: background 0.3s ease;
         }
 
-        .container { max-width: 420px; margin: 0 auto; position: relative; }
-        .nav-bar { display: flex; align-items: center; justify-content: space-between; margin: 10px 5px 25px; }
-        .icon-btn {
-            width: 42px; height: 42px; background: var(--glass-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            border: 1px solid var(--glass-border); border-radius: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-main);
+        .header {
+            padding: 15px 20px; 
+            background: transparent;
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            z-index: 100;
         }
-        .nav-bar h1 { font-size: 22px; font-weight: 900; letter-spacing: -1px; }
+        
+        .header-btn { 
+            width: 42px; 
+            height: 42px; 
+            border-radius: 14px; 
+            background: var(--btn-bg); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            cursor: pointer; 
+            color: var(--text-main);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: transform 0.1s ease, background 0.3s ease;
+            border: 1px solid var(--glass-border);
+        }
+        .header-btn:active { transform: scale(0.92); }
+        .header-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-        .mode-icon { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--text-main); position: relative; }
-        .dark-mode .mode-icon { background: var(--text-main); box-shadow: -4px -3px 0 0 var(--ios-bg) inset; border: none; }
+        .sun-icon { display: none; filter: drop-shadow(0 0 5px orange); }
+        .dark-mode .moon-icon { display: none; }
+        .dark-mode .sun-icon { display: block; }
 
-        .section { background: var(--glass-bg); backdrop-filter: blur(20px) saturate(160%); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: 15px; margin-bottom: 15px; }
-        .option-row { display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+        .header-title { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
 
-        .switch { position: relative; display: inline-block; width: 44px; height: 24px; pointer-events: none; }
+        .main-scroll { flex: 1; overflow-y: auto; padding: 15px; -webkit-overflow-scrolling: touch; }
+        .scroll-content { max-width: 420px; margin: 0 auto; padding-bottom: 250px; }
+
+        .control-block {
+            background: transparent; 
+            border-radius: var(--radius-md); 
+            border: 1px solid var(--glass-border);
+            transition: all 0.4s var(--smooth-curve); 
+            overflow: hidden;
+        }
+        
+        .control-group { margin-bottom: 15px; }
+        .capsule-row { padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; }
+        
+        .click-area { cursor: pointer; flex: 1; } 
+        .label-text { font-weight: 700; font-size: 18px; }
+        .sub-text { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
+
+        .stamp-container { height: 0; opacity: 0; transition: all 0.4s var(--smooth-curve); padding: 0 15px; visibility: hidden; }
+        .control-group.expanded .stamp-container { height: 170px; opacity: 1; padding-bottom: 15px; visibility: visible; }
+        .stamp-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+        .stamp-box { aspect-ratio: 1; border-radius: 12px; border: 1px solid var(--glass-border); background: rgba(120,120,120,0.05); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .stamp-box.selected { border: 2.5px solid var(--ios-accent); background: rgba(255, 255, 255, 0.2); }
+        .stamp-box img { max-width: 80%; }
+
+        /* 开关组件样式复原 */
+        .switch-wrapper { padding: 10px; cursor: pointer; margin-right: -10px; }
+        .switch { position: relative; width: 44px; height: 24px; pointer-events: none; display: inline-block; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #d1d1d6; transition: .3s; border-radius: 30px; }
         .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 2px; bottom: 2px; background-color: white; transition: .3s; border-radius: 50%; }
         input:checked + .slider { background-color: var(--ios-green); }
         input:checked + .slider:before { transform: translateX(20px); }
 
-        .stamp-wrap { overflow: hidden; height: 68px; transition: height 0.4s var(--smooth-curve); margin-top: 10px; }
-        .stamp-wrap.expand { height: 165px; }
-        .stamp-list { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
-        .stamp-item { aspect-ratio: 1; border: 1px solid var(--glass-border); border-radius: 10px; display: flex; align-items: center; justify-content: center; background: rgba(120,120,120,0.05); cursor: pointer; }
-        .stamp-item.selected { border-color: var(--ios-accent); background: var(--glass-bg); box-shadow: 0 0 0 1px var(--ios-accent); }
-        .stamp-item img { max-width: 80%; max-height: 80%; object-fit: contain; }
-
-        .expand-btn { width: 100%; padding: 8px; margin-top: 5px; background: rgba(120,120,120,0.08); border: none; border-radius: 10px; color: var(--ios-accent); font-size: 11px; font-weight: 800; cursor: pointer; }
-
-        .upload-btn { width: 100%; padding: 14px; border: 1.5px dashed var(--ios-accent); border-radius: var(--radius-sm); color: var(--ios-accent); font-weight: 700; background: rgba(0,122,255,0.03); cursor: pointer; margin-top: 10px; }
-        .status-bar { width: 100%; padding: 12px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; text-align: center; background: var(--ios-accent); color: #fff; display: none; margin-top: 10px; }
-        .download-btn { width: 100%; padding: 14px; border: none; border-radius: var(--radius-sm); background: var(--ios-green); color: #fff; font-weight: 700; display: none; margin-top: 10px; cursor: pointer; }
-
-        #resultContainer { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 15px; }
-        .result-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 14px; padding: 8px; animation: fadeIn 0.4s ease; }
-        
-        .poster-box { 
-            width: 100%; 
-            aspect-ratio: 450/700; 
-            border-radius: 8px; 
-            overflow: hidden; 
-            position: relative; 
-            background: #333; 
-        }
-        
-        .real-img { width: 100%; height: 100%; object-fit: cover; }
-
-        .border-overlay {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 10;
-            object-fit: fill;
-        }
-
-        .info-time { color: var(--text-sub); font-size: 10px; margin-top: 6px; text-align: center; font-weight: 600; }
-
         .settings-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; z-index: 2000; backdrop-filter: blur(8px); }
-        .modal-content { position: absolute; bottom: 30px; left: 15px; right: 15px; background: var(--glass-bg); border-radius: 24px; padding: 20px; border: 1px solid var(--glass-border); animation: slideUp 0.3s var(--smooth-curve); }
-        .size-option { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 0.5px solid rgba(120,120,120,0.1); font-weight: 700; color: var(--text-main); cursor: pointer; }
-        .size-option.active { color: var(--ios-accent); background: rgba(0,122,255,0.05); border-radius: 10px; }
+        .modal-content { position: absolute; bottom: 35px; left: 15px; right: 15px; background: var(--glass-bg); border-radius: 28px; padding: 22px; border: 1px solid var(--glass-border); animation: slideUp 0.3s var(--smooth-curve); }
+        .size-option { display: flex; align-items: center; justify-content: space-between; padding: 18px; border-bottom: 0.5px solid rgba(120,120,120,0.1); font-weight: 700; color: var(--text-main); cursor: pointer; }
+        .size-option.active { color: var(--ios-accent); background: rgba(0,122,255,0.05); border-radius: 12px; }
+
+        .footer-bar { position: fixed; bottom: 15px; left: 0; right: 0; padding: 0 20px; z-index: 100; pointer-events: none; }
+        .footer-content { max-width: 420px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px; pointer-events: auto; }
+        
+        .action-block { background: transparent; border-radius: var(--radius-md); text-align: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; }
+        .action-block:active { transform: scale(0.98); background: rgba(120,120,120,0.1); }
+        .action-text { width: 100%; padding: 8px 20px; font-weight: 800; font-size: 17px; }
+
+        #uploadBtn { border: 2px dashed var(--ios-accent); }
+        #uploadBtn .action-text { color: var(--ios-accent); }
+        #downloadBtn { display: none; border: 2px solid var(--ios-green); }
+        #downloadBtn .action-text { color: var(--ios-green); }
+
+        #resultContainer { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 20px; }
+        .result-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 8px; animation: fadeIn 0.4s ease; text-align: center; }
+        .poster-box { width: 100%; border-radius: 10px; overflow: hidden; background: #333; position: relative; }
+        .real-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .border-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; object-fit: fill; }
         
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
-<body oncontextmenu="return false;">
+<body>
 
-<div class="container">
-    <div class="nav-bar">
-        <div class="icon-btn" id="openSettings">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1 2-2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+<header class="header">
+    <div class="header-btn" id="openSettings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    </div>
+    <h1 class="header-title">海报自定义</h1>
+    <div class="header-btn" onclick="toggleTheme()">
+        <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+    </div>
+</header>
+
+<main class="main-scroll">
+    <div class="scroll-content">
+        <div class="control-block control-group" id="mainControl">
+            <div class="capsule-row">
+                <div class="click-area" id="titleBtn">
+                    <p class="label-text">使用限定标</p>
+                    <p class="sub-text">叠加在海报中心偏下位置</p>
+                </div>
+                <div class="switch-wrapper" id="switchBtn">
+                    <label class="switch">
+                        <input type="checkbox" id="useStamp">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="stamp-container">
+                <div class="stamp-grid" id="stampGrid"></div>
+            </div>
         </div>
-        <h1>海报自定义</h1>
-        <div class="icon-btn" onclick="toggleTheme()"><div class="mode-icon"></div></div>
+        <div id="resultContainer"></div>
     </div>
-    
-    <div class="section">
-        <div class="option-row" id="stampTrigger">
-            <div><p class="label-text">使用限定标</p><p class="sub-text">叠加在海报中心位置</p></div>
-            <label class="switch"><input type="checkbox" id="useStamp"><span class="slider"></span></label>
-        </div>
-        <div class="stamp-wrap" id="stampWrap"><div class="stamp-list" id="stampList"></div></div>
-        <button class="expand-btn" id="expandBtn">更多样式 ▾</button>
-    </div>
-
-    <div class="section">
-        <div id="miniPreview" style="display:flex;gap:6px;margin-bottom:10px;overflow:hidden;height:40px;"></div>
-        <button class="upload-btn" id="uploadBtn">选择图片开始处理</button>
-        <div id="statusBar" class="status-bar">正在处理图片...</div>
-        <button class="download-btn" id="downloadBtn">一键批量下载</button>
-    </div>
-
-    <div id="resultContainer"></div>
-</div>
+</main>
 
 <div class="settings-overlay" id="settingsOverlay">
     <div class="modal-content">
@@ -148,9 +175,20 @@
         <div class="size-option" data-w="450" data-h="700"><span>标准</span><span>450 x 700</span></div>
         <div class="size-option" data-w="180" data-h="280"><span>迷你</span><span>180 x 280</span></div>
         <div class="size-option" data-w="900" data-h="1400"><span>超高清</span><span>900 x 1400</span></div>
-        <button id="closeBtn" style="width:100%; padding:15px; background:rgba(120,120,120,0.1); border:none; border-radius:14px; margin-top:15px; font-weight:800; color:var(--ios-accent);">完成</button>
+        <button id="closeBtn" style="width:100%; padding:16px; background:rgba(120,120,120,0.1); border:none; border-radius:16px; margin-top:15px; font-weight:800; color:var(--ios-accent); cursor:pointer;">完成</button>
     </div>
 </div>
+
+<footer class="footer-bar">
+    <div class="footer-content">
+        <div class="action-block" id="uploadBtn">
+            <div class="action-text">选择图片开始处理</div>
+        </div>
+        <div class="action-block" id="downloadBtn">
+            <div class="action-text">保存海报</div>
+        </div>
+    </div>
+</footer>
 
 <script>
     function applyTheme(theme) { document.body.classList.toggle('dark-mode', theme === 'dark'); }
@@ -161,18 +199,12 @@
     }
     if (localStorage.getItem('licn-theme')) applyTheme(localStorage.getItem('licn-theme'));
 
-    let currentW = localStorage.getItem('posterW') || 450;
-    let currentH = localStorage.getItem('posterH') || 700;
-    let selectedStamp = null;
-    let uploadedFiles = [];
-    let processedFiles = [];
+    let currentW = localStorage.getItem('posterW') || 450, currentH = localStorage.getItem('posterH') || 700;
+    let selectedStamp = null, uploadedFiles = [], processedFiles = [];
 
     const overlay = document.getElementById('settingsOverlay');
     document.getElementById('openSettings').onclick = () => overlay.style.display = 'block';
-    document.getElementById('closeBtn').onclick = () => { 
-        overlay.style.display = 'none'; 
-        if(uploadedFiles.length > 0) autoProcess(); 
-    };
+    document.getElementById('closeBtn').onclick = () => { overlay.style.display = 'none'; if(uploadedFiles.length > 0) processImages(); };
 
     document.querySelectorAll('.size-option').forEach(opt => {
         if(opt.dataset.w == currentW) opt.classList.add('active');
@@ -185,117 +217,87 @@
         };
     });
 
-    const stampList = document.getElementById('stampList');
+    const grid = document.getElementById('stampGrid');
     for(let i=1; i<=10; i++) {
-        const item = document.createElement('div');
-        item.className = 'stamp-item';
-        item.innerHTML = `<img src="限定${i}.png" onerror="this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='">`;
-        item.onclick = () => {
-            document.querySelectorAll('.stamp-item').forEach(s => s.classList.remove('selected'));
-            item.classList.add('selected');
+        const box = document.createElement('div');
+        box.className = 'stamp-box';
+        box.innerHTML = `<img src="限定${i}.png" onerror="this.style.opacity='0'">`;
+        box.onclick = (e) => {
+            e.stopPropagation();
+            document.querySelectorAll('.stamp-box').forEach(b => b.classList.remove('selected'));
+            box.classList.add('selected');
             selectedStamp = i;
             document.getElementById('useStamp').checked = true;
+            document.getElementById('mainControl').classList.remove('expanded'); // 选完收起
             if (window.navigator.vibrate) window.navigator.vibrate(5);
-            if(uploadedFiles.length > 0) autoProcess();
+            if(uploadedFiles.length > 0) processImages();
         };
-        stampList.appendChild(item);
+        grid.appendChild(box);
     }
 
-    document.getElementById('stampTrigger').onclick = () => {
-        const cb = document.getElementById('useStamp');
-        cb.checked = !cb.checked;
+    // 标题区域：控制展开/收起切换
+    document.getElementById('titleBtn').onclick = () => {
+        const control = document.getElementById('mainControl');
+        control.classList.toggle('expanded');
         if (window.navigator.vibrate) window.navigator.vibrate(5);
-        if(uploadedFiles.length > 0) autoProcess();
     };
 
-    document.getElementById('expandBtn').onclick = function() {
-        const isExp = document.getElementById('stampWrap').classList.toggle('expand');
-        this.innerText = isExp ? '收起样式 ▲' : '更多样式 ▾';
+    // 开关区域：控制勾选状态，并固定触发展开
+    document.getElementById('switchBtn').onclick = (e) => {
+        const checkbox = document.getElementById('useStamp');
+        const control = document.getElementById('mainControl');
+        
+        checkbox.checked = !checkbox.checked; // 切换开关状态
+        control.classList.add('expanded');    // 只要点开关，就展开
+        
+        if (window.navigator.vibrate) window.navigator.vibrate(5);
+        if(uploadedFiles.length > 0) processImages();
     };
 
     const fileInput = document.createElement('input');
-    fileInput.type = 'file'; fileInput.multiple = true; fileInput.accept = 'image/*';
+    fileInput.type = 'file'; fileInput.multiple = true;
     document.getElementById('uploadBtn').onclick = () => fileInput.click();
-    
-    fileInput.onchange = (e) => {
-        uploadedFiles = Array.from(e.target.files);
-        if(uploadedFiles.length === 0) return;
-        const mini = document.getElementById('miniPreview');
-        mini.innerHTML = '';
-        uploadedFiles.forEach(f => {
-            const reader = new FileReader();
-            reader.onload = (ev) => { mini.innerHTML += `<div style="min-width:40px;height:40px;border-radius:6px;overflow:hidden;border:1px solid var(--glass-border)"><img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;"></div>`; };
-            reader.readAsDataURL(f);
-        });
-        autoProcess();
-    };
+    fileInput.onchange = (e) => { uploadedFiles = Array.from(e.target.files); processImages(); };
 
-    async function autoProcess() {
+    async function processImages() {
         const container = document.getElementById('resultContainer');
         const dlBtn = document.getElementById('downloadBtn');
-        const status = document.getElementById('statusBar');
         container.innerHTML = ''; processedFiles = [];
-        status.style.display = 'block'; dlBtn.style.display = 'none';
-
         const useStamp = document.getElementById('useStamp').checked;
-
         for(let i=0; i<uploadedFiles.length; i++) {
-            status.innerText = `处理中 ${i+1}/${uploadedFiles.length}`;
-            const blob = await processImg(uploadedFiles[i], useStamp);
+            const blob = await processSingle(uploadedFiles[i], useStamp);
             const url = URL.createObjectURL(blob);
-            processedFiles.push({ blob, url, name: `Poster_${i+1}.png` });
-            
+            processedFiles.push({ url, name: `Poster_${i+1}.png` });
             const card = document.createElement('div');
             card.className = 'result-card';
-            card.innerHTML = `
-                <div class="poster-box" style="aspect-ratio:${currentW}/${currentH}">
-                    <img src="${url}" class="real-img">
-                    <img src="边框.png" class="border-overlay" onerror="this.style.opacity='0'">
-                </div>
-                <div class="info-time">已生成</div>
-            `;
+            card.innerHTML = `<div class="poster-box" style="aspect-ratio:${currentW}/${currentH}"><img src="${url}" class="real-img"><img src="边框.png" class="border-overlay" onerror="this.style.opacity='0'"></div><p style="font-size:10px; margin-top:5px; color:var(--text-sub);">已生成</p>`;
             container.appendChild(card);
         }
-        status.style.display = 'none'; dlBtn.style.display = 'block';
+        dlBtn.style.display = 'block';
     }
 
-    async function processImg(file, useStamp) {
+    async function processSingle(file, useStamp) {
         return new Promise(resolve => {
-            const img = new Image();
-            img.src = URL.createObjectURL(file);
+            const img = new Image(); img.src = URL.createObjectURL(file);
             img.onload = async () => {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
+                const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
                 canvas.width = currentW; canvas.height = currentH;
                 const scale = Math.max(canvas.width/img.width, canvas.height/img.height);
                 const w = img.width * scale, h = img.height * scale;
                 ctx.drawImage(img, (canvas.width-w)/2, (canvas.height-h)/2, w, h);
-                
                 if(useStamp && selectedStamp) {
-                    const sImg = new Image();
-                    sImg.src = `限定${selectedStamp}.png`;
+                    const sImg = new Image(); sImg.src = `限定${selectedStamp}.png`;
                     await new Promise(r => { sImg.onload = r; sImg.onerror = r; });
-                    
-                    const sw = canvas.width; 
-                    const sh = (sImg.height / sImg.width) * sw;
-                    
-                    // 核心修改：在中心点的基础上，额外加下移半个限定标高度 (sh/2)
+                    const sw = canvas.width; const sh = (sImg.height / sImg.width) * sw;
                     ctx.drawImage(sImg, 0, (canvas.height - sh) / 2 + (sh / 2), sw, sh);
                 }
-                URL.revokeObjectURL(img.src);
-                canvas.toBlob(resolve, 'image/png');
+                URL.revokeObjectURL(img.src); canvas.toBlob(resolve, 'image/png');
             };
         });
     }
 
     document.getElementById('downloadBtn').onclick = () => {
-        processedFiles.forEach((item, i) => {
-            setTimeout(() => {
-                const a = document.createElement('a');
-                a.href = item.url; a.download = item.name;
-                a.click();
-            }, i * 300);
-        });
+        processedFiles.forEach((f, i) => { setTimeout(() => { const a = document.createElement('a'); a.href = f.url; a.download = f.name; a.click(); }, i * 350); });
     };
 </script>
 </body>
