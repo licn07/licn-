@@ -5,229 +5,232 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>LICN名片工具</title>
     <style>
+        @font-face {
+            font-family: 'LiCN-Custom';
+            src: url('Roboto.ttf') format('truetype');
+            font-weight: normal; font-style: normal; font-display: swap;
+        }
+
         :root {
             --ios-bg: #f2f2f7;
-            --ios-card: rgba(255, 255, 255, 0.85);
             --ios-accent: #007aff;
-            --ios-gray: #8e8e93;
-            --radius-lg: 22px;
+            --ios-green: #34c759;
             --radius-md: 14px;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--ios-bg);
-            margin: 0; padding: 20px;
-            display: flex; flex-direction: column; align-items: center;
-            min-height: 100vh;
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'LiCN-Custom', -apple-system, sans-serif !important;
         }
 
-        .app-container { width: 100%; max-width: 440px; }
+        body { background: var(--ios-bg); padding: 15px; color: #000; min-height: 100vh; }
+        .container { max-width: 500px; margin: 0 auto; }
+        
+        .header { margin: 25px 0 25px 10px; }
+        .header h1 { font-size: 28px; font-weight: 800; letter-spacing: -1px; }
 
-        header { margin-bottom: 20px; padding: 0 4px; }
-        h1 { font-size: 32px; font-weight: 800; letter-spacing: -1px; margin: 0; }
-        .subtitle { font-size: 14px; color: var(--ios-gray); margin-top: 4px; }
-
-        .settings-group {
-            background: var(--ios-card);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border-radius: var(--radius-lg); padding: 4px 16px; margin-bottom: 15px;
+        .section {
+            background: #fff; border-radius: var(--radius-md);
+            padding: 18px; margin-bottom: 16px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.03);
         }
 
-        .setting-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 14px 0; border-bottom: 0.5px solid rgba(0,0,0,0.1);
+        .control-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 0; border-bottom: 0.5px solid #efeff4;
         }
-        .setting-item:last-child { border-bottom: none; }
+        .control-row:last-child { border-bottom: none; }
 
-        /* Switch */
-        .switch { position: relative; display: inline-block; width: 51px; height: 31px; }
+        .label-text { font-size: 16px; font-weight: 500; }
+        .sub-text { font-size: 12px; color: #8e8e93; font-weight: normal; }
+
+        /* iOS 开关样式 */
+        .switch {
+            position: relative; display: inline-block; width: 51px; height: 31px;
+        }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider {
             position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #e9e9ea; transition: .3s; border-radius: 34px;
+            background-color: #e9e9eb; transition: .4s; border-radius: 34px;
         }
         .slider:before {
             position: absolute; content: ""; height: 27px; width: 27px; left: 2px; bottom: 2px;
-            background-color: white; transition: .3s; border-radius: 50%;
+            background-color: white; transition: .4s; border-radius: 50%;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
         }
-        input:checked + .slider { background-color: #34c759; }
+        input:checked + .slider { background-color: var(--ios-green); }
         input:checked + .slider:before { transform: translateX(20px); }
 
-        .btn-group { display: flex; flex-direction: column; gap: 10px; }
-        .action-btn {
-            background: var(--ios-accent); color: white; text-align: center;
-            padding: 16px; border-radius: var(--radius-md); font-weight: 600;
-            display: block; cursor: pointer; border: none; width: 100%; font-size: 16px;
-        }
-        .action-btn.secondary { background: #e5e5ea; color: var(--ios-accent); margin-top: 5px; }
-        
-        #fileInput { display: none; }
-        #status { text-align: center; font-size: 13px; color: var(--ios-gray); margin: 15px 0; }
-
-        #previewContainer {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+        .upload-btn {
+            width: 100%; padding: 18px; border: 1.5px dashed #c7c7cc; border-radius: 14px;
+            color: var(--ios-accent); font-size: 16px; margin: 15px 0;
+            background: transparent; font-weight: 600; cursor: pointer;
         }
 
-        .img-card {
-            background: white; border-radius: var(--radius-md);
-            overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        .process-btn {
+            width: 100%; padding: 16px; border: none; border-radius: 14px;
+            font-size: 17px; font-weight: 600; background: var(--ios-accent); color: #fff;
+            transition: all 0.2s;
         }
-        .img-card img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; }
-        .card-info { padding: 8px; font-size: 10px; text-align: center; border-top: 0.5px solid #eee; }
+        .process-btn:active { opacity: 0.8; transform: scale(0.98); }
+
+        .preview-area { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .preview-box { width: 60px; height: 45px; border-radius: 6px; overflow: hidden; background: #ddd; border: 0.5px solid #ccc; }
+        .preview-box img { width: 100%; height: 100%; object-fit: cover; }
+
+        #resultContainer { margin-top: 20px; }
+        .result-card {
+            background: #fff; border-radius: 14px; padding: 10px; margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center;
+        }
+        .result-card img { width: 100%; border-radius: 8px; display: block; margin-bottom: 10px; }
+        .dl-link { color: var(--ios-accent); text-decoration: none; font-weight: 600; font-size: 14px; }
     </style>
 </head>
 <body>
 
-<div class="app-container">
-    <header>
-        <h1>LICN名片工具</h1>
-        <div class="subtitle">仿iOS 26UI · 4：3构图·压缩</div>
-    </header>
+<div class="container">
+    <div class="header">
+        <h1>名片剪切工具</h1>
+    </div>
 
-    <div class="settings-group">
-        <div class="setting-item">
-            <span style="font-weight: 500;">开启极限压缩 (640px)</span>
+    <div class="section">
+        <div class="control-row">
+            <div>
+                <div class="label-text">保持原图分辨率</div>
+                <div class="sub-text">关闭压缩以维持最高清晰度</div>
+            </div>
             <label class="switch">
-                <input type="checkbox" id="compressToggle" checked>
+                <input type="checkbox" id="compressToggle">
                 <span class="slider"></span>
             </label>
         </div>
+        <div class="control-row">
+            <div>
+                <div class="label-text">剪切比例</div>
+                <div class="sub-text">当前强制锁定为 4:3</div>
+            </div>
+            <div style="font-weight: 700; color: var(--ios-accent);">4 : 3</div>
+        </div>
     </div>
 
-    <div class="btn-group">
-        <label class="action-btn" for="fileInput">选取照片</label>
-        <button id="downloadAllBtn" class="action-btn secondary" style="display: none;">储存全部</button>
-        <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" multiple>
+    <div class="section">
+        <div class="preview-area" id="previewArea"></div>
+        <button class="upload-btn" id="uploadBtn">选择名片原图</button>
+        <button class="process-btn" id="processBtn">开始剪切处理</button>
     </div>
 
-    <div id="status">等待选图...</div>
-    <div id="previewContainer"></div>
+    <div id="resultContainer"></div>
 </div>
 
 <script>
-    const fileInput = document.getElementById('fileInput');
-    const previewContainer = document.getElementById('previewContainer');
-    const compressToggle = document.getElementById('compressToggle');
-    const downloadAllBtn = document.getElementById('downloadAllBtn');
-    const statusText = document.getElementById('status');
+    let selectedFiles = [];
 
-    let cachedFiles = [];
-
-    // 状态切换监听
-    compressToggle.addEventListener('change', () => {
-        if (cachedFiles.length > 0) processAllFiles();
-    });
-
-    // 核心选图监听
+    // 文件选择逻辑
+    const uploadBtn = document.getElementById('uploadBtn');
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file'; fileInput.multiple = true; fileInput.accept = 'image/*';
+    
+    uploadBtn.onclick = () => fileInput.click();
+    
     fileInput.onchange = (e) => {
-        console.log("检测到选图事件");
-        let files = Array.from(e.target.files);
-        if (files.length === 0) return;
-
-        // 排序逻辑
-        files.sort((a, b) => a.lastModified - b.lastModified);
-        
-        if (files.length > 100) files = files.slice(0, 100);
-        
-        cachedFiles = files;
-        processAllFiles();
-    };
-
-    async function processAllFiles() {
-        previewContainer.innerHTML = '';
-        downloadAllBtn.style.display = 'none';
-        statusText.innerText = `正在处理 ${cachedFiles.length} 张图片...`;
-
-        try {
-            for (let i = 0; i < cachedFiles.length; i++) {
-                const file = cachedFiles[i];
-                const res = await processImage(file);
-                
-                // 构造文件名
-                const d = new Date(file.lastModified);
-                const timeStr = d.getFullYear() + 
-                                String(d.getMonth() + 1).padStart(2, '0') + 
-                                String(d.getDate()).padStart(2, '0') + "_" +
-                                String(d.getHours()).padStart(2, '0') + 
-                                String(d.getMinutes()).padStart(2, '0') +
-                                String(d.getSeconds()).padStart(2, '0');
-                
-                renderCard(res, `${timeStr}_${file.name}`, d.toLocaleString());
-                statusText.innerText = `已处理 (${i + 1}/${cachedFiles.length})`;
-            }
-            statusText.innerText = `处理完成，共 ${cachedFiles.length} 张`;
-            downloadAllBtn.style.display = 'block';
-        } catch (err) {
-            statusText.innerText = "处理出错: " + err.message;
-            console.error(err);
-        }
-    }
-
-    function processImage(file) {
-        return new Promise((resolve, reject) => {
+        selectedFiles = Array.from(e.target.files);
+        const previewArea = document.getElementById('previewArea');
+        previewArea.innerHTML = '';
+        selectedFiles.forEach(file => {
             const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    const isCompress = compressToggle.checked;
-                    
-                    const ratio = 4/3;
-                    let sw, sh, sx, sy;
-                    if (img.width / img.height > ratio) {
-                        sw = img.height * ratio; sh = img.height;
-                        sx = (img.width - sw) / 2; sy = 0;
-                    } else {
-                        sw = img.width; sh = img.width / ratio;
-                        sx = 0; sy = (img.height - sh) / 2;
-                    }
-
-                    if (isCompress) {
-                        canvas.width = 640; canvas.height = 480;
-                        ctx.imageSmoothingEnabled = false;
-                    } else {
-                        canvas.width = sw; canvas.height = sh;
-                        ctx.imageSmoothingEnabled = true;
-                    }
-
-                    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
-                    const quality = isCompress ? 0.4 : 0.92;
-                    const dataUrl = canvas.toDataURL('image/jpeg', quality);
-                    resolve({ dataUrl, size: Math.round((dataUrl.length * 3 / 4) / 1024) });
-                };
-                img.onerror = () => reject(new Error("图片加载失败"));
-                img.src = e.target.result;
+            reader.onload = (ev) => {
+                const box = document.createElement('div');
+                box.className = 'preview-box';
+                box.innerHTML = `<img src="${ev.target.result}">`;
+                previewArea.appendChild(box);
             };
-            reader.onerror = () => reject(new Error("文件读取失败"));
             reader.readAsDataURL(file);
         });
-    }
-
-    function renderCard(result, fileName, timeLabel) {
-        const div = document.createElement('div');
-        div.className = 'img-card';
-        div.innerHTML = `
-            <img src="${result.dataUrl}">
-            <div class="card-info">
-                <div style="color:#8e8e93;margin-bottom:2px">${timeLabel}</div>
-                <div style="color:#34c759;font-weight:700">${result.size} KB</div>
-            </div>
-            <a href="${result.dataUrl}" download="${fileName}" class="dl-link" style="display:none"></a>
-        `;
-        div.onclick = () => div.querySelector('.dl-link').click();
-        previewContainer.appendChild(div);
-    }
-
-    downloadAllBtn.onclick = () => {
-        const links = previewContainer.querySelectorAll('.dl-link');
-        links.forEach((link, i) => {
-            setTimeout(() => link.click(), i * 350);
-        });
     };
+
+    // 核心处理逻辑
+    document.getElementById('processBtn').onclick = async function() {
+        if(selectedFiles.length === 0) return alert("请先上传图片");
+        
+        const isCompress = document.getElementById('compressToggle').checked;
+        const container = document.getElementById('resultContainer');
+        container.innerHTML = '';
+        this.innerText = "处理中...";
+
+        for(let file of selectedFiles) {
+            const blob = await cropImage(file, isCompress);
+            const url = URL.createObjectURL(blob);
+            
+            const card = document.createElement('div');
+            card.className = 'result-card';
+            card.innerHTML = `
+                <img src="${url}">
+                <a href="${url}" download="CROP_${file.name}" class="dl-link">保存这张名片</a>
+            `;
+            container.appendChild(card);
+        }
+        this.innerText = "处理完成";
+    };
+
+    async function cropImage(file, compress) {
+        return new Promise(resolve => {
+            const img = new Image();
+            img.src = URL.createObjectURL(file);
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                // 目标比例 4:3
+                const targetRatio = 4 / 3;
+                let finalWidth, finalHeight;
+
+                if (!compress) {
+                    // --- 不压缩逻辑：保持原图尺寸 ---
+                    // 以原图的长边或宽边为基准，计算出符合 4:3 的最大面积
+                    if (img.width / img.height > targetRatio) {
+                        // 图片太宽了，以高度为准
+                        finalHeight = img.height;
+                        finalWidth = img.height * targetRatio;
+                    } else {
+                        // 图片太高了，以宽度为准
+                        finalWidth = img.width;
+                        finalHeight = img.width / targetRatio;
+                    }
+                } else {
+                    // --- 压缩逻辑：可以设定一个固定的常用名片像素 ---
+                    finalWidth = 1200; 
+                    finalHeight = 900;
+                }
+
+                canvas.width = finalWidth;
+                canvas.height = finalHeight;
+
+                // 计算居中偏移量（从原图中居中切出 4:3）
+                const sourceRatio = img.width / img.height;
+                let sx, sy, sw, sh;
+
+                if (sourceRatio > targetRatio) {
+                    sh = img.height;
+                    sw = img.height * targetRatio;
+                    sx = (img.width - sw) / 2;
+                    sy = 0;
+                } else {
+                    sw = img.width;
+                    sh = img.width / targetRatio;
+                    sx = 0;
+                    sy = (img.height - sh) / 2;
+                }
+
+                ctx.drawImage(img, sx, sy, sw, sh, 0, 0, finalWidth, finalHeight);
+                
+                // 输出图片
+                canvas.toBlob(resolve, 'image/jpeg', 0.95);
+            };
+        });
+    }
 </script>
+
 </body>
 </html>
