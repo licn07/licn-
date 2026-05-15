@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LICN名片工具</title>
+    <title>LiCN · 名片工具</title>
     <style>
         @font-face {
             font-family: 'LiCN-Custom';
@@ -15,7 +15,8 @@
             --ios-bg: #f2f2f7;
             --ios-accent: #007aff;
             --ios-green: #34c759;
-            --radius-md: 14px;
+            --radius-md: 18px;
+            --radius-sm: 10px;
         }
 
         * {
@@ -24,101 +25,116 @@
             font-family: 'LiCN-Custom', -apple-system, sans-serif !important;
         }
 
-        body { background: var(--ios-bg); padding: 15px; color: #000; min-height: 100vh; }
-        .container { max-width: 500px; margin: 0 auto; }
+        body { background: var(--ios-bg); padding: 12px; color: #000; min-height: 100vh; }
+        .container { max-width: 420px; margin: 0 auto; }
         
-        .header { margin: 25px 0 25px 10px; }
-        .header h1 { font-size: 28px; font-weight: 800; letter-spacing: -1px; }
+        .header { margin: 10px 0 15px 5px; }
+        .header h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
 
         .section {
             background: #fff; border-radius: var(--radius-md);
-            padding: 18px; margin-bottom: 16px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+            padding: 14px; margin-bottom: 12px;
+            box-shadow: 0 1px 10px rgba(0,0,0,0.02);
         }
 
-        .control-row {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 10px 0; border-bottom: 0.5px solid #efeff4;
-        }
-        .control-row:last-child { border-bottom: none; }
+        .control-row { display: flex; align-items: center; justify-content: space-between; }
+        .label-text { font-size: 15px; font-weight: 600; }
+        .sub-text { font-size: 11px; color: #8e8e93; }
 
-        .label-text { font-size: 16px; font-weight: 500; }
-        .sub-text { font-size: 12px; color: #8e8e93; font-weight: normal; }
-
-        /* iOS 开关样式 */
-        .switch {
-            position: relative; display: inline-block; width: 51px; height: 31px;
-        }
+        /* iOS 开关缩小 */
+        .switch { position: relative; display: inline-block; width: 44px; height: 26px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider {
             position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #e9e9eb; transition: .4s; border-radius: 34px;
+            background-color: #e9e9eb; transition: .4s; border-radius: 30px;
         }
         .slider:before {
-            position: absolute; content: ""; height: 27px; width: 27px; left: 2px; bottom: 2px;
+            position: absolute; content: ""; height: 22px; width: 22px; left: 2px; bottom: 2px;
             background-color: white; transition: .4s; border-radius: 50%;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         input:checked + .slider { background-color: var(--ios-green); }
-        input:checked + .slider:before { transform: translateX(20px); }
+        input:checked + .slider:before { transform: translateX(18px); }
 
-        .upload-btn {
-            width: 100%; padding: 18px; border: 1.5px dashed #c7c7cc; border-radius: 14px;
-            color: var(--ios-accent); font-size: 16px; margin: 15px 0;
-            background: transparent; font-weight: 600; cursor: pointer;
+        /* 紧凑预览区 */
+        .preview-wrapper { position: relative; margin-bottom: 10px; }
+        .preview-area { 
+            display: flex; flex-wrap: wrap; gap: 6px; 
+            overflow: hidden; height: 42px; /* 初始高度仅容纳一排 */
+            transition: height 0.3s ease;
         }
-
-        .process-btn {
-            width: 100%; padding: 16px; border: none; border-radius: 14px;
-            font-size: 17px; font-weight: 600; background: var(--ios-accent); color: #fff;
-            transition: all 0.2s;
-        }
-        .process-btn:active { opacity: 0.8; transform: scale(0.98); }
-
-        .preview-area { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-        .preview-box { width: 60px; height: 45px; border-radius: 6px; overflow: hidden; background: #ddd; border: 0.5px solid #ccc; }
+        .preview-area.expanded { height: auto; min-height: 42px; }
+        
+        .preview-box { width: 55px; height: 42px; border-radius: 6px; overflow: hidden; background: #eee; border: 0.5px solid #ddd; }
         .preview-box img { width: 100%; height: 100%; object-fit: cover; }
-
-        #resultContainer { margin-top: 20px; }
-        .result-card {
-            background: #fff; border-radius: 14px; padding: 10px; margin-bottom: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center;
+        
+        .expand-toggle {
+            font-size: 11px; color: var(--ios-accent); font-weight: 600;
+            margin-top: 5px; display: none; text-align: right; cursor: pointer;
         }
-        .result-card img { width: 100%; border-radius: 8px; display: block; margin-bottom: 10px; }
-        .dl-link { color: var(--ios-accent); text-decoration: none; font-weight: 600; font-size: 14px; }
+
+        /* 按钮变小精致 */
+        .upload-btn {
+            width: 100%; padding: 12px; border: 1.2px dashed #c7c7cc; border-radius: var(--radius-sm);
+            color: var(--ios-accent); font-size: 14px; margin-bottom: 10px;
+            background: #fbfbfd; font-weight: 600; cursor: pointer;
+        }
+
+        .btn-group { display: flex; flex-direction: column; gap: 8px; }
+        .process-btn, .download-all-btn {
+            width: 100%; padding: 13px; border: none; border-radius: var(--radius-sm);
+            font-size: 15px; font-weight: 600; text-align: center;
+        }
+        .process-btn { background: var(--ios-accent); color: #fff; }
+        .download-all-btn { background: var(--ios-green); color: #fff; display: none; }
+
+        /* 结果展示：精致小卡片 */
+        #resultContainer { 
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; 
+        }
+        .result-card {
+            background: #fff; border-radius: 14px; padding: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; flex-direction: column;
+        }
+        .result-card img { width: 100%; aspect-ratio: 4/3; border-radius: 8px; object-fit: cover; margin-bottom: 6px; }
+        
+        .info-size { color: var(--ios-green); font-size: 12px; font-weight: 700; }
+        .info-time { color: #000; font-size: 9px; font-weight: 500; margin-bottom: 6px; }
+        
+        .dl-link { 
+            display: block; width: 100%; padding: 6px; background: #f2f2f7; border-radius: 6px;
+            color: var(--ios-accent); text-decoration: none; font-weight: 700; font-size: 11px; text-align: center;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="header">
-        <h1>名片剪切工具</h1>
-    </div>
+    <div class="header"><h1>名片剪切</h1></div>
 
     <div class="section">
         <div class="control-row">
             <div>
-                <div class="label-text">保持原图分辨率</div>
-                <div class="sub-text">关闭压缩以维持最高清晰度</div>
+                <p class="label-text">极限压缩模式</p>
+                <p class="sub-text">关闭保持原像素 · 4:3</p>
             </div>
             <label class="switch">
                 <input type="checkbox" id="compressToggle">
                 <span class="slider"></span>
             </label>
         </div>
-        <div class="control-row">
-            <div>
-                <div class="label-text">剪切比例</div>
-                <div class="sub-text">当前强制锁定为 4:3</div>
-            </div>
-            <div style="font-weight: 700; color: var(--ios-accent);">4 : 3</div>
-        </div>
     </div>
 
     <div class="section">
-        <div class="preview-area" id="previewArea"></div>
+        <div class="preview-wrapper">
+            <div class="preview-area" id="previewArea"></div>
+            <div class="expand-toggle" id="expandToggle">展开更多图片 ▾</div>
+        </div>
         <button class="upload-btn" id="uploadBtn">选择名片原图</button>
-        <button class="process-btn" id="processBtn">开始剪切处理</button>
+        <div class="btn-group">
+            <button class="process-btn" id="processBtn">开始处理</button>
+            <button class="download-all-btn" id="downloadAllBtn">一键批量下载</button>
+        </div>
     </div>
 
     <div id="resultContainer"></div>
@@ -126,9 +142,11 @@
 
 <script>
     let selectedFiles = [];
+    let processedBlobs = [];
 
-    // 文件选择逻辑
     const uploadBtn = document.getElementById('uploadBtn');
+    const previewArea = document.getElementById('previewArea');
+    const expandToggle = document.getElementById('expandToggle');
     const fileInput = document.createElement('input');
     fileInput.type = 'file'; fileInput.multiple = true; fileInput.accept = 'image/*';
     
@@ -136,8 +154,10 @@
     
     fileInput.onchange = (e) => {
         selectedFiles = Array.from(e.target.files);
-        const previewArea = document.getElementById('previewArea');
+        processedBlobs = [];
+        document.getElementById('downloadAllBtn').style.display = 'none';
         previewArea.innerHTML = '';
+        
         selectedFiles.forEach(file => {
             const reader = new FileReader();
             reader.onload = (ev) => {
@@ -148,30 +168,74 @@
             };
             reader.readAsDataURL(file);
         });
+
+        // 逻辑：如果图片超过一排（约5-6张），显示展开按钮
+        setTimeout(() => {
+            if (previewArea.scrollHeight > 45) {
+                expandToggle.style.display = 'block';
+            } else {
+                expandToggle.style.display = 'none';
+            }
+        }, 100);
     };
 
-    // 核心处理逻辑
+    // 展开/收起功能
+    expandToggle.onclick = () => {
+        const isExpanded = previewArea.classList.toggle('expanded');
+        expandToggle.innerText = isExpanded ? '收起预览 ▲' : '展开更多图片 ▾';
+    };
+
     document.getElementById('processBtn').onclick = async function() {
-        if(selectedFiles.length === 0) return alert("请先上传图片");
+        const total = selectedFiles.length;
+        if(total === 0) return;
         
         const isCompress = document.getElementById('compressToggle').checked;
         const container = document.getElementById('resultContainer');
         container.innerHTML = '';
-        this.innerText = "处理中...";
+        processedBlobs = [];
+        
+        const btn = this;
+        const dlBtn = document.getElementById('downloadAllBtn');
+        btn.disabled = true;
 
-        for(let file of selectedFiles) {
-            const blob = await cropImage(file, isCompress);
+        for(let i = 0; i < total; i++) {
+            btn.innerText = `处理中 ${i + 1}/${total}`;
+            const file = selectedFiles[i];
+            const { blob } = await cropImage(file, isCompress);
             const url = URL.createObjectURL(blob);
+            const sizeKB = (blob.size / 1024).toFixed(1);
+            
+            processedBlobs.push({ blob, name: `LICN_${file.name}` });
+            
+            const d = new Date();
+            const timeStr = `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}`;
             
             const card = document.createElement('div');
             card.className = 'result-card';
             card.innerHTML = `
                 <img src="${url}">
-                <a href="${url}" download="CROP_${file.name}" class="dl-link">保存这张名片</a>
+                <p class="info-size">${sizeKB} KB</p>
+                <p class="info-time">${timeStr}</p>
+                <a href="${url}" download="LICN_${file.name}" class="dl-link">下载单个</a>
             `;
             container.appendChild(card);
+            await new Promise(r => setTimeout(r, 15));
         }
-        this.innerText = "处理完成";
+
+        btn.innerText = "重新处理";
+        btn.disabled = false;
+        dlBtn.style.display = 'block';
+    };
+
+    document.getElementById('downloadAllBtn').onclick = function() {
+        processedBlobs.forEach((item, index) => {
+            setTimeout(() => {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(item.blob);
+                a.download = item.name;
+                a.click();
+            }, index * 250);
+        });
     };
 
     async function cropImage(file, compress) {
@@ -181,56 +245,23 @@
             img.onload = () => {
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
-
-                // 目标比例 4:3
                 const targetRatio = 4 / 3;
-                let finalWidth, finalHeight;
-
-                if (!compress) {
-                    // --- 不压缩逻辑：保持原图尺寸 ---
-                    // 以原图的长边或宽边为基准，计算出符合 4:3 的最大面积
-                    if (img.width / img.height > targetRatio) {
-                        // 图片太宽了，以高度为准
-                        finalHeight = img.height;
-                        finalWidth = img.height * targetRatio;
-                    } else {
-                        // 图片太高了，以宽度为准
-                        finalWidth = img.width;
-                        finalHeight = img.width / targetRatio;
-                    }
+                let sw, sh, sx, sy;
+                if (img.width / img.height > targetRatio) {
+                    sh = img.height; sw = img.height * targetRatio;
+                    sx = (img.width - sw) / 2; sy = 0;
                 } else {
-                    // --- 压缩逻辑：可以设定一个固定的常用名片像素 ---
-                    finalWidth = 1200; 
-                    finalHeight = 900;
+                    sw = img.width; sh = img.width / targetRatio;
+                    sx = 0; sy = (img.height - sh) / 2;
                 }
-
-                canvas.width = finalWidth;
-                canvas.height = finalHeight;
-
-                // 计算居中偏移量（从原图中居中切出 4:3）
-                const sourceRatio = img.width / img.height;
-                let sx, sy, sw, sh;
-
-                if (sourceRatio > targetRatio) {
-                    sh = img.height;
-                    sw = img.height * targetRatio;
-                    sx = (img.width - sw) / 2;
-                    sy = 0;
-                } else {
-                    sw = img.width;
-                    sh = img.width / targetRatio;
-                    sx = 0;
-                    sy = (img.height - sh) / 2;
-                }
-
-                ctx.drawImage(img, sx, sy, sw, sh, 0, 0, finalWidth, finalHeight);
-                
-                // 输出图片
-                canvas.toBlob(resolve, 'image/jpeg', 0.95);
+                let dw = compress ? 1000 : sw;
+                let dh = compress ? (1000 / targetRatio) : sh;
+                canvas.width = dw; canvas.height = dh;
+                ctx.drawImage(img, sx, sy, sw, sh, 0, 0, dw, dh);
+                canvas.toBlob((blob) => resolve({ blob }), 'image/jpeg', compress ? 0.6 : 0.92);
             };
         });
     }
 </script>
-
 </body>
 </html>
