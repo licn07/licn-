@@ -12,7 +12,6 @@
         }
 
         :root {
-            /* 调深了背景色，确保文字能看清 */
             --glass: rgba(0, 0, 0, 0.45); 
             --glass-border: rgba(255, 255, 255, 0.15);
             --text-main: #ffffff;
@@ -47,11 +46,9 @@
             z-index: 10;
         }
 
-        /* 强化标题可见度 */
         header {
             text-align: center;
-            margin-bottom: 50px;
-            animation: fadeInDown 0.8s ease-out forwards;
+            margin-bottom: 40px;
         }
 
         header h1 {
@@ -59,18 +56,25 @@
             font-weight: 900;
             letter-spacing: -1px;
             color: #fff;
-            /* 多重阴影确保在亮色背景下也能看清 */
             text-shadow: 0 4px 15px rgba(0,0,0,0.6), 0 0 30px rgba(0,204,255,0.3);
-            display: inline-block;
-            padding: 5px 20px;
-            border-radius: 100px;
         }
 
-        /* iOS 26 纯文字卡片 */
+        /* 分组样式 */
+        .group-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin: 20px 0 10px 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
         .grid-box {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 14px;
+            gap: 12px;
+            margin-bottom: 10px;
         }
 
         .card {
@@ -78,36 +82,35 @@
             backdrop-filter: blur(50px) saturate(200%);
             -webkit-backdrop-filter: blur(50px) saturate(200%);
             border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 35px 10px; /* 增加高度补偿图标缺失 */
+            border-radius: 22px;
+            padding: 30px 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--text-main);
             text-decoration: none;
             transition: all 0.3s cubic-bezier(0.2, 0, 0.2, 1);
-            /* 文字阴影防止背景干扰 */
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
             box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            text-align: center;
         }
 
         .card span {
-            font-size: 1.05rem;
+            font-size: 0.95rem;
             font-weight: 700;
-            letter-spacing: 0.5px;
+            line-height: 1.3;
         }
 
-        /* 触感反馈 */
         .card:active {
             transform: scale(0.94);
             background: rgba(0, 0, 0, 0.6);
-            transition: transform 0.1s;
         }
 
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-30px); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        .container { animation: fadeIn 0.8s ease-out; }
     </style>
 </head>
 <body>
@@ -118,36 +121,42 @@
             <h1>LiCN · 中枢</h1>
         </header>
 
+        <div class="group-label">Poster Service / 海报服务</div>
         <div class="grid-box">
             <div class="card" onclick="location.href='海报自定义工具.html'">
                 <span>海报自定义工具</span>
             </div>
-
-            <div class="card" onclick="location.href='LICN 名片图库.html'">
-                <span>LICN 名片图库</span>
-            </div>
-
             <div class="card" onclick="window.open('https://jcn101cvl5dk.feishu.cn/wiki/D9V4wqJgviIYXuka2KHcUXJ2nie','_blank')">
-                <span>我的海报图库</span>
+                <span>进入海报图库</span>
             </div>
+        </div>
 
-            <div class="card" onclick="window.open('https://www.91m.top','_blank')">
+        <div class="group-label">Card Service / 名片服务圈</div>
+        <div class="grid-box">
+            <div class="card" onclick="location.href='LICN名片工具.html'">
+                <span>名片剪切工具</span>
+            </div>
+            <div class="card" onclick="location.href='LICN名片图库.html'">
+                <span>进入名片图库</span>
+            </div>
+        </div>
+
+        <div class="group-label">External / 外部助手</div>
+        <div class="grid-box">
+            <div class="card" style="grid-column: span 2; padding: 20px;" onclick="window.open('https://www.91m.top','_blank')">
                 <span>苏苏荣耀助手</span>
             </div>
         </div>
     </div>
 
     <script>
-        // 粒子逻辑保持极简以减少视觉干扰
         const canvas = document.getElementById('particles');
         const ctx = canvas.getContext('2d');
         let w, h, particles = [];
-
         function setSize() {
             w = window.innerWidth; h = window.innerHeight;
             canvas.width = w; canvas.height = h;
         }
-
         class Particle {
             constructor() { this.init(); }
             init() {
@@ -167,14 +176,12 @@
                 ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
             }
         }
-
         function setup() {
             setSize();
             for (let i = 0; i < 50; i++) particles.push(new Particle());
             window.addEventListener('resize', setSize);
             loop();
         }
-
         function loop() {
             ctx.clearRect(0, 0, w, h);
             particles.forEach(p => { p.update(); p.draw(); });
@@ -183,7 +190,6 @@
         setup();
     </script>
 
-<script>document.documentElement.style.setProperty('--page-bg', 'url("删")');</script>
-
+    <script>document.documentElement.style.setProperty('--page-bg', 'url("删")');</script>
 </body>
 </html>
