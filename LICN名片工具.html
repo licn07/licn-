@@ -16,7 +16,7 @@
             --ios-accent: #007aff;
             --ios-green: #34c759;
             --radius-md: 18px;
-            --radius-sm: 10px;
+            --radius-sm: 12px;
         }
 
         * {
@@ -41,7 +41,7 @@
         .label-text { font-size: 15px; font-weight: 600; }
         .sub-text { font-size: 11px; color: #8e8e93; }
 
-        /* iOS 开关缩小 */
+        /* iOS 开关 */
         .switch { position: relative; display: inline-block; width: 44px; height: 26px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider {
@@ -56,11 +56,11 @@
         input:checked + .slider { background-color: var(--ios-green); }
         input:checked + .slider:before { transform: translateX(18px); }
 
-        /* 紧凑预览区 */
+        /* 预览区一排显示 */
         .preview-wrapper { position: relative; margin-bottom: 10px; }
         .preview-area { 
             display: flex; flex-wrap: wrap; gap: 6px; 
-            overflow: hidden; height: 42px; /* 初始高度仅容纳一排 */
+            overflow: hidden; height: 42px; 
             transition: height 0.3s ease;
         }
         .preview-area.expanded { height: auto; min-height: 42px; }
@@ -73,22 +73,28 @@
             margin-top: 5px; display: none; text-align: right; cursor: pointer;
         }
 
-        /* 按钮变小精致 */
+        /* 按钮与状态 */
         .upload-btn {
             width: 100%; padding: 12px; border: 1.2px dashed #c7c7cc; border-radius: var(--radius-sm);
             color: var(--ios-accent); font-size: 14px; margin-bottom: 10px;
             background: #fbfbfd; font-weight: 600; cursor: pointer;
         }
 
-        .btn-group { display: flex; flex-direction: column; gap: 8px; }
-        .process-btn, .download-all-btn {
+        .status-btn {
+            width: 100%; padding: 13px; border: none; border-radius: var(--radius-sm);
+            font-size: 15px; font-weight: 700; text-align: center;
+            background: #e5e5ea; color: #8e8e93; display: none;
+        }
+        .status-btn.active { background: var(--ios-accent); color: #fff; display: block; }
+        .status-btn.done { background: var(--ios-green); color: #fff; }
+
+        .download-all-btn {
             width: 100%; padding: 13px; border: none; border-radius: var(--radius-sm);
             font-size: 15px; font-weight: 600; text-align: center;
+            background: var(--ios-green); color: #fff; margin-top: 10px; display: none;
         }
-        .process-btn { background: var(--ios-accent); color: #fff; }
-        .download-all-btn { background: var(--ios-green); color: #fff; display: none; }
 
-        /* 结果展示：精致小卡片 */
+        /* 结果区域 */
         #resultContainer { 
             display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; 
         }
@@ -128,13 +134,12 @@
     <div class="section">
         <div class="preview-wrapper">
             <div class="preview-area" id="previewArea"></div>
-            <div class="expand-toggle" id="expandToggle">展开更多图片 ▾</div>
+            <div class="expand-toggle" id="expandToggle">展开预览 ▾</div>
         </div>
-        <button class="upload-btn" id="uploadBtn">选择名片原图</button>
-        <div class="btn-group">
-            <button class="process-btn" id="processBtn">开始处理</button>
-            <button class="download-all-btn" id="downloadAllBtn">一键批量下载</button>
-        </div>
+        <button class="upload-btn" id="uploadBtn">选择图片 (选完自动处理)</button>
+        
+        <div id="statusBtn" class="status-btn">准备就绪</div>
+        <button id="downloadAllBtn" class="download-all-btn">一键下载所有</button>
     </div>
 
     <div id="resultContainer"></div>
@@ -145,6 +150,8 @@
     let processedBlobs = [];
 
     const uploadBtn = document.getElementById('uploadBtn');
+    const statusBtn = document.getElementById('statusBtn');
+    const dlBtn = document.getElementById('downloadAllBtn');
     const previewArea = document.getElementById('previewArea');
     const expandToggle = document.getElementById('expandToggle');
     const fileInput = document.createElement('input');
@@ -152,12 +159,17 @@
     
     uploadBtn.onclick = () => fileInput.click();
     
-    fileInput.onchange = (e) => {
+    // --- 核心修改：文件改变后立刻自动处理 ---
+    fileInput.onchange = async (e) => {
         selectedFiles = Array.from(e.target.files);
+        if (selectedFiles.length === 0) return;
+
         processedBlobs = [];
-        document.getElementById('downloadAllBtn').style.display = 'none';
+        dlBtn.style.display = 'none';
         previewArea.innerHTML = '';
+        document.getElementById('resultContainer').innerHTML = '';
         
+        // 1. 显示预览
         selectedFiles.forEach(file => {
             const reader = new FileReader();
             reader.onload = (ev) => {
@@ -169,37 +181,25 @@
             reader.readAsDataURL(file);
         });
 
-        // 逻辑：如果图片超过一排（约5-6张），显示展开按钮
         setTimeout(() => {
-            if (previewArea.scrollHeight > 45) {
-                expandToggle.style.display = 'block';
-            } else {
-                expandToggle.style.display = 'none';
-            }
+            expandToggle.style.display = previewArea.scrollHeight > 45 ? 'block' : 'none';
         }, 100);
+
+        // 2. 自动启动处理流程
+        await autoProcessAll();
     };
 
-    // 展开/收起功能
-    expandToggle.onclick = () => {
-        const isExpanded = previewArea.classList.toggle('expanded');
-        expandToggle.innerText = isExpanded ? '收起预览 ▲' : '展开更多图片 ▾';
-    };
-
-    document.getElementById('processBtn').onclick = async function() {
+    async function autoProcessAll() {
         const total = selectedFiles.length;
-        if(total === 0) return;
-        
         const isCompress = document.getElementById('compressToggle').checked;
         const container = document.getElementById('resultContainer');
-        container.innerHTML = '';
-        processedBlobs = [];
         
-        const btn = this;
-        const dlBtn = document.getElementById('downloadAllBtn');
-        btn.disabled = true;
+        statusBtn.style.display = 'block';
+        statusBtn.className = 'status-btn active';
+        uploadBtn.style.display = 'none'; // 处理时隐藏上传按钮，防止混乱
 
         for(let i = 0; i < total; i++) {
-            btn.innerText = `处理中 ${i + 1}/${total}`;
+            statusBtn.innerText = `正在自动处理 ${i + 1}/${total}`;
             const file = selectedFiles[i];
             const { blob } = await cropImage(file, isCompress);
             const url = URL.createObjectURL(blob);
@@ -219,15 +219,26 @@
                 <a href="${url}" download="LICN_${file.name}" class="dl-link">下载单个</a>
             `;
             container.appendChild(card);
-            await new Promise(r => setTimeout(r, 15));
+            await new Promise(r => setTimeout(r, 10)); // 保证UI平滑更新
         }
 
-        btn.innerText = "重新处理";
-        btn.disabled = false;
+        statusBtn.innerText = "处理完成 √";
+        statusBtn.className = 'status-btn active done';
         dlBtn.style.display = 'block';
+        
+        // 3秒后恢复上传按钮，方便下一次操作
+        setTimeout(() => {
+            uploadBtn.style.display = 'block';
+            statusBtn.style.display = 'none';
+        }, 3000);
+    }
+
+    expandToggle.onclick = () => {
+        const isExpanded = previewArea.classList.toggle('expanded');
+        expandToggle.innerText = isExpanded ? '收起预览 ▲' : '展开预览 ▾';
     };
 
-    document.getElementById('downloadAllBtn').onclick = function() {
+    dlBtn.onclick = function() {
         processedBlobs.forEach((item, index) => {
             setTimeout(() => {
                 const a = document.createElement('a');
