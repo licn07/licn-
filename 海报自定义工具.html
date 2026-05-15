@@ -276,12 +276,11 @@
                     sImg.src = `限定${selectedStamp}.png`;
                     await new Promise(r => { sImg.onload = r; sImg.onerror = r; });
                     
-                    // 核心修改：放大至两侧边缘
                     const sw = canvas.width; 
                     const sh = (sImg.height / sImg.width) * sw;
                     
-                    // 保持中心位置并应用微量向下位移
-                    ctx.drawImage(sImg, 0, (canvas.height - sh) / 2 + (canvas.height * 0.07), sw, sh);
+                    // 核心修改：在中心点的基础上，额外加下移半个限定标高度 (sh/2)
+                    ctx.drawImage(sImg, 0, (canvas.height - sh) / 2 + (sh / 2), sw, sh);
                 }
                 URL.revokeObjectURL(img.src);
                 canvas.toBlob(resolve, 'image/png');
