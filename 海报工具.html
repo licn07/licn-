@@ -28,7 +28,6 @@
         body { background: var(--ios-bg); padding: 15px; color: #000; }
         .container { max-width: 500px; margin: 0 auto; }
         
-        /* iOS 26 风格标题 */
         .header { margin: 25px 0 25px 10px; }
         .header h1 { font-size: 30px; font-weight: 800; letter-spacing: -1px; }
 
@@ -40,18 +39,17 @@
 
         .section h2 { font-size: 17px; font-weight: 600; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; }
 
-        /* --- 核心修复：物理遮罩区域 --- */
+        /* 物理遮罩：锁定第一排高度 */
         .stamp-wrap {
             overflow: hidden;
-            /* 关键：19vw 是 5列布局下精准的一排高度，确保第二排绝对露不出来 */
             height: 19vw; 
-            max-height: 95px; /* 大屏适配 */
+            max-height: 95px; 
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         .stamp-wrap.expand {
             height: auto;
-            max-height: 500px; /* 展开后的上限 */
+            max-height: 600px; 
         }
 
         .stamp-list {
@@ -76,7 +74,6 @@
             color: var(--ios-accent); font-size: 14px; font-weight: 600;
         }
 
-        /* --- 功能区域 --- */
         .preview-area { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
         .preview-item { width: 55px; height: 55px; border-radius: 8px; overflow: hidden; background: #f2f2f7; border: 0.5px solid #d1d1d6; }
         .preview-item img { width: 100%; height: 100%; object-fit: cover; }
@@ -129,7 +126,6 @@
     let allBlobs = [];
     let frameFile = "边框.png";
 
-    // 1. 初始化列表：坚持读取 限定1.png
     const stampList = document.getElementById('stampList');
     for(let i=1; i<=10; i++){
         let item = document.createElement('div');
@@ -144,7 +140,6 @@
         };
     }
 
-    // 2. 展开收起逻辑
     const stampWrap = document.getElementById('stampWrap');
     const expandBtn = document.getElementById('expandBtn');
     expandBtn.onclick = () => {
@@ -152,7 +147,6 @@
         expandBtn.innerText = isExpand ? '收起限定标' : '展开全部限定标';
     };
 
-    // 3. 文件上传逻辑
     const uploadBtn = document.getElementById('uploadBtn');
     const fileInput = document.createElement('input');
     fileInput.type = 'file'; fileInput.multiple = true; fileInput.accept = 'image/*';
@@ -170,7 +164,6 @@
         });
     };
 
-    // 4. 海报合成逻辑
     document.getElementById('processBtn').onclick = async function() {
         if(uploadedFiles.length === 0) return;
         this.innerText = "处理中...";
@@ -178,7 +171,6 @@
         container.innerHTML = '<div style="text-align:center;color:#007aff;font-size:12px;margin:10px 0;">预览带方框，下载为原图</div>';
         allBlobs = [];
         
-        // 自动检测边框文件
         frameFile = await new Promise(res => {
             const img = new Image();
             img.onload = () => res("边框.png");
@@ -207,6 +199,7 @@
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
                 canvas.width = 450; canvas.height = 700;
+                
                 const scale = Math.max(canvas.width/img.width, canvas.height/img.height);
                 const w = img.width * scale, h = img.height * scale;
                 ctx.drawImage(img, (canvas.width-w)/2, (canvas.height-h)/2, w, h);
@@ -217,14 +210,17 @@
                     await new Promise(r => { stamp.onload = r; });
                     const sw = canvas.width * 0.85;
                     const sh = (stamp.height/stamp.width) * sw;
-                    ctx.drawImage(stamp, (canvas.width-sw)/2, (canvas.height-sh)/2 + 50, sw, sh);
+                    
+                    // --- 关键调整：原位置 +50 基础上再下移半个标的高度 (sh / 2) ---
+                    const offsetY = (canvas.height - sh) / 2 + 50 + (sh / 2);
+                    
+                    ctx.drawImage(stamp, (canvas.width - sw) / 2, offsetY, sw, sh);
                 }
                 canvas.toBlob(resolve, 'image/png');
             };
         });
     }
 
-    // 5. 批量下载
     document.getElementById('downloadBtn').onclick = () => {
         allBlobs.forEach((blob, i) => {
             const a = document.createElement('a');
