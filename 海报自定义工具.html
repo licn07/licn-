@@ -17,6 +17,8 @@
             --ios-green: #34c759;
             --radius-md: 14px;
             --radius-sm: 10px;
+            /* 动画曲线 */
+            --ios-curve: cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * {
@@ -46,14 +48,29 @@
         input:checked + .slider { background-color: var(--ios-green); }
         input:checked + .slider:before { transform: translateX(18px); }
 
-        .stamp-wrap { overflow: hidden; height: 17vw; max-height: 70px; transition: all 0.4s ease; }
-        .stamp-wrap.expand { height: auto; max-height: 500px; }
+        /* --- 动画优化核心区域 --- */
+        .stamp-wrap { 
+            overflow: hidden; 
+            height: 17vw; 
+            max-height: 70px; 
+            opacity: 0.95;
+            transition: max-height 0.5s var(--ios-curve), opacity 0.4s var(--ios-curve), height 0.5s var(--ios-curve); 
+        }
+        .stamp-wrap.expand { 
+            height: auto; 
+            max-height: 800px; /* 足够容纳所有内容 */
+            opacity: 1;
+        }
+        /* ----------------------- */
+
         .stamp-list { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
-        .stamp-item { width: 100%; aspect-ratio: 1; border: 1px solid #f2f2f7; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: #fbfbfd; }
+        .stamp-item { width: 100%; aspect-ratio: 1; border: 1px solid #f2f2f7; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: #fbfbfd; transition: transform 0.1s; }
+        .stamp-item:active { transform: scale(0.92); }
         .stamp-item img { max-width: 80%; max-height: 80%; object-fit: contain; }
         .stamp-item.selected { border-color: var(--ios-accent); background: #f2f8ff; box-shadow: 0 0 0 1px var(--ios-accent); }
 
-        .expand-btn { width: 100%; padding: 6px; margin-top: 8px; background: #f2f2f7; border: none; border-radius: 6px; color: var(--ios-accent); font-size: 10px; font-weight: 700; }
+        .expand-btn { width: 100%; padding: 6px; margin-top: 8px; background: #f2f2f7; border: none; border-radius: 6px; color: var(--ios-accent); font-size: 10px; font-weight: 700; transition: background 0.2s; }
+        .expand-btn:active { background: #e5e5ea; }
 
         .preview-area { display: flex; flex-wrap: wrap; gap: 4px; overflow: hidden; height: 48px; }
         .preview-item { width: 48px; height: 48px; border-radius: 6px; overflow: hidden; background: #eee; border: 0.5px solid #ddd; }
@@ -73,8 +90,8 @@
         .frame-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
         .info-time { color: #8e8e93; font-size: 8px; margin-top: 4px; text-align: center; }
 
-        .settings-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); display: none; z-index: 1000; backdrop-filter: blur(4px); }
-        .modal-content { position: absolute; bottom: 20px; left: 8px; right: 8px; background: #fff; border-radius: 20px; padding: 15px; animation: slideUp 0.2s ease-out; }
+        .settings-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); display: none; z-index: 1000; backdrop-filter: blur(4px); transition: opacity 0.3s; }
+        .modal-content { position: absolute; bottom: 20px; left: 8px; right: 8px; background: #fff; border-radius: 20px; padding: 15px; animation: slideUp 0.3s var(--ios-curve); }
         .size-option { display: flex; align-items: center; justify-content: space-between; padding: 14px; border-bottom: 0.5px solid #f2f2f7; font-weight: 600; font-size: 14px; }
         .size-option.active { color: var(--ios-accent); }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
@@ -122,10 +139,9 @@
     let selectedStampNum = null;
     let uploadedFiles = [];
     let allBlobs = [];
-    let activeObjectURLs = []; // 用于追踪并清理 ObjectURL
+    let activeObjectURLs = [];
     let frameFile = "边框.png";
 
-    // 清理缓存函数
     function clearImageCache() {
         activeObjectURLs.forEach(url => URL.revokeObjectURL(url));
         activeObjectURLs = [];
@@ -189,7 +205,7 @@
 
     async function autoProcess() {
         const container = document.getElementById('resultContainer');
-        clearImageCache(); // 处理前先清理旧缓存
+        clearImageCache();
         container.innerHTML = '';
         dlBtn.style.display = 'none'; uploadBtn.style.display = 'none';
         statusBar.style.display = 'block'; statusBar.className = 'status-bar active';
@@ -206,7 +222,7 @@
             const blob = await processImg(uploadedFiles[i]);
             allBlobs.push(blob);
             const url = URL.createObjectURL(blob);
-            activeObjectURLs.push(url); // 记录 URL 待清理
+            activeObjectURLs.push(url);
             
             const d = new Date();
             const timeStr = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
@@ -217,7 +233,6 @@
             await new Promise(r => setTimeout(r, 10));
         }
 
-        // 修改按钮文字：多张为批量下载，一张为立即下载
         dlBtn.innerText = uploadedFiles.length > 1 ? "一键批量下载" : "立即下载图片";
         statusBar.innerText = "处理完成";
         statusBar.className = 'status-bar active done';
@@ -245,7 +260,7 @@
                     const sh = (stamp.height/stamp.width) * sw;
                     ctx.drawImage(stamp, (canvas.width-sw)/2, (canvas.height-sh)/2 + (canvas.height*0.07), sw, sh);
                 }
-                URL.revokeObjectURL(src); // 处理完释放上传图的内存
+                URL.revokeObjectURL(src);
                 canvas.toBlob(resolve, 'image/png');
             };
         });
@@ -253,13 +268,11 @@
 
     dlBtn.onclick = () => {
         if(allBlobs.length === 1) {
-            // 单张立即下载
             const a = document.createElement('a');
             a.href = activeObjectURLs[0];
             a.download = `LICN_${currentW}x${currentH}.png`;
             a.click();
         } else {
-            // 多张批量下载
             allBlobs.forEach((blob, i) => {
                 setTimeout(() => {
                     const a = document.createElement('a');
