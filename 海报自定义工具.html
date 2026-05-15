@@ -35,52 +35,29 @@
             --text-sub: rgba(255, 255, 255, 0.5);
         }
 
-        /* 基础样式重置 */
-        * {
-            margin: 0; padding: 0; box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent !important;
-            font-family: 'LiCN-Custom', -apple-system, sans-serif !important;
-        }
-
-        /* 仅对背景颜色和边框进行过渡，避免文字颜色切换延迟 */
-        body, .section, .icon-btn, .result-card, .modal-content, .upload-btn {
-            transition: background 0.3s ease, border-color 0.3s ease;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'LiCN-Custom', -apple-system, sans-serif !important; }
 
         body { 
             background-color: var(--ios-bg);
             background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-            background-size: 30px 30px; background-attachment: fixed;
-            padding: 15px; color: var(--text-main); min-height: 100vh; 
+            background-size: 30px 30px; background-attachment: fixed; padding: 15px; color: var(--text-main); min-height: 100vh; 
+            transition: background 0.3s ease;
         }
 
         .container { max-width: 420px; margin: 0 auto; position: relative; }
-
-        /* 导航栏 */
         .nav-bar { display: flex; align-items: center; justify-content: space-between; margin: 10px 5px 25px; }
         .icon-btn {
             width: 42px; height: 42px; background: var(--glass-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            border: 1px solid var(--glass-border); border-radius: 14px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; color: var(--text-main);
+            border: 1px solid var(--glass-border); border-radius: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-main);
         }
         .nav-bar h1 { font-size: 22px; font-weight: 900; letter-spacing: -1px; }
 
         .mode-icon { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--text-main); position: relative; }
         .dark-mode .mode-icon { background: var(--text-main); box-shadow: -4px -3px 0 0 var(--ios-bg) inset; border: none; }
 
-        /* 通用卡片容器 */
-        .section { 
-            background: var(--glass-bg); backdrop-filter: blur(20px) saturate(160%); border: 1px solid var(--glass-border);
-            border-radius: var(--radius-md); padding: 15px; margin-bottom: 15px; 
-        }
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px) saturate(160%); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: 15px; margin-bottom: 15px; }
+        .option-row { display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
 
-        /* 选项布局 */
-        .option-row { display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
-        .option-row:active .switch .slider { opacity: 0.8; }
-        .label-text { font-size: 15px; font-weight: 700; }
-        .sub-text { font-size: 11px; color: var(--text-sub); }
-
-        /* 开关样式 */
         .switch { position: relative; display: inline-block; width: 44px; height: 24px; pointer-events: none; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #d1d1d6; transition: .3s; border-radius: 30px; }
@@ -88,47 +65,47 @@
         input:checked + .slider { background-color: var(--ios-green); }
         input:checked + .slider:before { transform: translateX(20px); }
 
-        /* 限定标样式 */
-        .stamp-wrap { overflow: hidden; height: 68px; opacity: 0.9; transition: height 0.4s var(--smooth-curve); }
-        .stamp-wrap.expand { height: 165px; opacity: 1; }
+        .stamp-wrap { overflow: hidden; height: 68px; transition: height 0.4s var(--smooth-curve); margin-top: 10px; }
+        .stamp-wrap.expand { height: 165px; }
         .stamp-list { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
-        .stamp-item { 
-            aspect-ratio: 1; border: 1px solid var(--glass-border); border-radius: 10px; 
-            display: flex; align-items: center; justify-content: center; background: rgba(120,120,120,0.05); 
-        }
+        .stamp-item { aspect-ratio: 1; border: 1px solid var(--glass-border); border-radius: 10px; display: flex; align-items: center; justify-content: center; background: rgba(120,120,120,0.05); cursor: pointer; }
         .stamp-item.selected { border-color: var(--ios-accent); background: var(--glass-bg); box-shadow: 0 0 0 1px var(--ios-accent); }
         .stamp-item img { max-width: 80%; max-height: 80%; object-fit: contain; }
-        .expand-btn { width: 100%; padding: 8px; margin-top: 8px; background: rgba(120,120,120,0.08); border: none; border-radius: 10px; color: var(--ios-accent); font-size: 11px; font-weight: 800; }
 
-        /* 按钮 */
-        .upload-btn { width: 100%; padding: 14px; border: 1.5px dashed var(--ios-accent); border-radius: var(--radius-sm); color: var(--ios-accent); font-weight: 700; background: rgba(0,122,255,0.03); cursor: pointer; }
-        .status-bar { width: 100%; padding: 12px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; text-align: center; background: #e5e5ea; color: #8e8e93; display: none; margin-top: 10px; }
-        .status-bar.active { background: var(--ios-accent); color: #fff; display: block; }
+        .expand-btn { width: 100%; padding: 8px; margin-top: 5px; background: rgba(120,120,120,0.08); border: none; border-radius: 10px; color: var(--ios-accent); font-size: 11px; font-weight: 800; cursor: pointer; }
+
+        .upload-btn { width: 100%; padding: 14px; border: 1.5px dashed var(--ios-accent); border-radius: var(--radius-sm); color: var(--ios-accent); font-weight: 700; background: rgba(0,122,255,0.03); cursor: pointer; margin-top: 10px; }
+        .status-bar { width: 100%; padding: 12px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; text-align: center; background: var(--ios-accent); color: #fff; display: none; margin-top: 10px; }
         .download-btn { width: 100%; padding: 14px; border: none; border-radius: var(--radius-sm); background: var(--ios-green); color: #fff; font-weight: 700; display: none; margin-top: 10px; cursor: pointer; }
 
-        /* 预览区域 */
         #resultContainer { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 15px; }
         .result-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 14px; padding: 8px; animation: fadeIn 0.4s ease; }
         
-        /* 核心预览框逻辑 */
+        /* 预览框容器 */
         .poster-box { 
-            width: 100%; aspect-ratio: 450/700; border-radius: 8px; overflow: hidden; 
-            position: relative; /* 绝对定位基准 */
+            width: 100%; 
+            aspect-ratio: 450/700; 
+            border-radius: 8px; 
+            overflow: hidden; 
+            position: relative; 
             background: #333; 
         }
-        .poster-img { width: 100%; height: 100%; object-fit: cover; }
         
-        /* 边框覆盖层：仅用于预览，不影响下载 */
+        .real-img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* 边框覆盖层：仅预览，不被打入下载图 */
         .border-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; /* 穿透点击 */
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none; /* 让长按操作穿透边框保存下面的真图 */
             z-index: 10;
             object-fit: fill;
         }
 
         .info-time { color: var(--text-sub); font-size: 10px; margin-top: 6px; text-align: center; font-weight: 600; }
 
-        /* 弹窗 */
+        /* 弹窗抽屉 */
         .settings-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; z-index: 2000; backdrop-filter: blur(8px); }
         .modal-content { position: absolute; bottom: 30px; left: 15px; right: 15px; background: var(--glass-bg); border-radius: 24px; padding: 20px; border: 1px solid var(--glass-border); animation: slideUp 0.3s var(--smooth-curve); }
         .size-option { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 0.5px solid rgba(120,120,120,0.1); font-weight: 700; color: var(--text-main); cursor: pointer; }
@@ -146,25 +123,23 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1 2-2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
         </div>
         <h1>海报自定义</h1>
-        <div class="icon-btn" onclick="toggleTheme()">
-            <div class="mode-icon"></div>
-        </div>
+        <div class="icon-btn" onclick="toggleTheme()"><div class="mode-icon"></div></div>
     </div>
     
     <div class="section">
-        <div class="option-row" id="stampToggleBox" style="margin-bottom:12px;">
-            <div><p class="label-text">使用限定标</p><p class="sub-text">勾选后在中心叠加样式</p></div>
+        <div class="option-row" id="stampTrigger">
+            <div><p class="label-text">使用限定标</p><p class="sub-text">叠加在海报中心位置</p></div>
             <label class="switch"><input type="checkbox" id="useStamp"><span class="slider"></span></label>
         </div>
         <div class="stamp-wrap" id="stampWrap"><div class="stamp-list" id="stampList"></div></div>
-        <button class="expand-btn" id="expandBtn">展开样式 ▾</button>
+        <button class="expand-btn" id="expandBtn">更多样式 ▾</button>
     </div>
 
     <div class="section">
-        <div class="preview-area" id="previewArea" style="display:flex;gap:6px;margin-bottom:10px;overflow:hidden;height:40px;"></div>
-        <button class="upload-btn" id="uploadBtn">选择图片并开始处理</button>
-        <div id="statusBar" class="status-bar">正在处理...</div>
-        <button class="download-btn" id="downloadBtn">一键保存所有</button>
+        <div id="miniPreview" style="display:flex;gap:6px;margin-bottom:10px;overflow:hidden;height:40px;"></div>
+        <button class="upload-btn" id="uploadBtn">选择图片开始处理</button>
+        <div id="statusBar" class="status-bar">正在处理图片...</div>
+        <button class="download-btn" id="downloadBtn">一键批量下载</button>
     </div>
 
     <div id="resultContainer"></div>
@@ -181,6 +156,7 @@
 </div>
 
 <script>
+    // 主题功能
     function applyTheme(theme) { document.body.classList.toggle('dark-mode', theme === 'dark'); }
     function toggleTheme() {
         const isDark = document.body.classList.toggle('dark-mode');
@@ -189,19 +165,19 @@
     }
     if (localStorage.getItem('licn-theme')) applyTheme(localStorage.getItem('licn-theme'));
 
+    // 设置功能
     let currentW = localStorage.getItem('posterW') || 450;
     let currentH = localStorage.getItem('posterH') || 700;
-    let selectedStampNum = null;
+    let selectedStamp = null;
     let uploadedFiles = [];
-    let allBlobs = [];
-    let activeObjectURLs = [];
+    let processedFiles = [];
 
     const overlay = document.getElementById('settingsOverlay');
-    const stampCheck = document.getElementById('useStamp');
-    const stampToggleBox = document.getElementById('stampToggleBox');
-
     document.getElementById('openSettings').onclick = () => overlay.style.display = 'block';
-    document.getElementById('closeBtn').onclick = () => { overlay.style.display = 'none'; if(uploadedFiles.length > 0) autoProcess(); };
+    document.getElementById('closeBtn').onclick = () => { 
+        overlay.style.display = 'none'; 
+        if(uploadedFiles.length > 0) autoProcess(); 
+    };
 
     document.querySelectorAll('.size-option').forEach(opt => {
         if(opt.dataset.w == currentW) opt.classList.add('active');
@@ -214,87 +190,86 @@
         };
     });
 
-    // 限定标列表生成
+    // 限定标列表
     const stampList = document.getElementById('stampList');
-    for(let i=1; i<=10; i++){
-        let item = document.createElement('div');
+    for(let i=1; i<=10; i++) {
+        const item = document.createElement('div');
         item.className = 'stamp-item';
         item.innerHTML = `<img src="限定${i}.png" onerror="this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='">`;
-        stampList.appendChild(item);
         item.onclick = () => {
-            document.querySelectorAll('.stamp-item').forEach(s=>s.classList.remove('selected'));
+            document.querySelectorAll('.stamp-item').forEach(s => s.classList.remove('selected'));
             item.classList.add('selected');
-            selectedStampNum = i; stampCheck.checked = true;
+            selectedStamp = i;
+            document.getElementById('useStamp').checked = true;
             if (window.navigator.vibrate) window.navigator.vibrate(5);
-            if(uploadedFiles.length > 0) autoProcess(); 
+            if(uploadedFiles.length > 0) autoProcess();
         };
+        stampList.appendChild(item);
     }
 
-    stampToggleBox.onclick = () => {
-        stampCheck.checked = !stampCheck.checked;
+    document.getElementById('stampTrigger').onclick = () => {
+        const cb = document.getElementById('useStamp');
+        cb.checked = !cb.checked;
         if (window.navigator.vibrate) window.navigator.vibrate(5);
         if(uploadedFiles.length > 0) autoProcess();
     };
 
-    const uploadBtn = document.getElementById('uploadBtn');
-    const statusBar = document.getElementById('statusBar');
-    const dlBtn = document.getElementById('downloadBtn');
+    document.getElementById('expandBtn').onclick = function() {
+        const isExp = document.getElementById('stampWrap').classList.toggle('expand');
+        this.innerText = isExp ? '收起样式 ▲' : '更多样式 ▾';
+    };
+
+    // 文件处理
     const fileInput = document.createElement('input');
     fileInput.type = 'file'; fileInput.multiple = true; fileInput.accept = 'image/*';
-    uploadBtn.onclick = () => fileInput.click();
-
-    fileInput.onchange = async (e) => {
+    document.getElementById('uploadBtn').onclick = () => fileInput.click();
+    
+    fileInput.onchange = (e) => {
         uploadedFiles = Array.from(e.target.files);
         if(uploadedFiles.length === 0) return;
-        const previewArea = document.getElementById('previewArea');
-        previewArea.innerHTML = '';
+        const mini = document.getElementById('miniPreview');
+        mini.innerHTML = '';
         uploadedFiles.forEach(f => {
             const reader = new FileReader();
-            reader.onload = (ev) => {
-                previewArea.innerHTML += `<div style="min-width:40px;height:40px;border-radius:6px;overflow:hidden;border:1px solid var(--glass-border)"><img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;"></div>`;
-            };
+            reader.onload = (ev) => { mini.innerHTML += `<div style="min-width:40px;height:40px;border-radius:6px;overflow:hidden;border:1px solid var(--glass-border)"><img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;"></div>`; };
             reader.readAsDataURL(f);
         });
-        await autoProcess();
+        autoProcess();
     };
 
     async function autoProcess() {
         const container = document.getElementById('resultContainer');
-        activeObjectURLs.forEach(url => URL.revokeObjectURL(url));
-        activeObjectURLs = []; allBlobs = [];
-        container.innerHTML = '';
-        dlBtn.style.display = 'none'; uploadBtn.style.display = 'none';
-        statusBar.style.display = 'block'; statusBar.className = 'status-bar active';
+        const dlBtn = document.getElementById('downloadBtn');
+        const status = document.getElementById('statusBar');
+        container.innerHTML = ''; processedFiles = [];
+        status.style.display = 'block'; dlBtn.style.display = 'none';
+
+        const useStamp = document.getElementById('useStamp').checked;
 
         for(let i=0; i<uploadedFiles.length; i++) {
-            statusBar.innerText = `处理中 ${i+1}/${uploadedFiles.length}`;
-            const blob = await processImg(uploadedFiles[i]);
-            allBlobs.push(blob);
+            status.innerText = `处理中 ${i+1}/${uploadedFiles.length}`;
+            const blob = await processImg(uploadedFiles[i], useStamp);
             const url = URL.createObjectURL(blob);
-            activeObjectURLs.push(url);
+            processedFiles.push({ blob, url, name: `Poster_${i+1}.png` });
             
             const card = document.createElement('div');
             card.className = 'result-card';
-            // 重点：这里预览带边框，但 blob 本身不含边框
             card.innerHTML = `
-                <div class="poster-box">
-                    <img src="${url}" class="poster-img">
-                    <img src="./边框.png" class="border-overlay" onerror="this.style.opacity='0'; console.warn('未发现边框.png')">
+                <div class="poster-box" style="aspect-ratio:${currentW}/${currentH}">
+                    <img src="${url}" class="real-img">
+                    <img src="边框.png" class="border-overlay" onerror="this.style.opacity='0'">
                 </div>
-                <div class="info-time">生成成功</div>
+                <div class="info-time">已生成</div>
             `;
             container.appendChild(card);
         }
-        statusBar.innerText = "处理完成";
-        dlBtn.style.display = 'block';
-        setTimeout(() => { uploadBtn.style.display = 'block'; statusBar.style.display = 'none'; }, 1500);
+        status.style.display = 'none'; dlBtn.style.display = 'block';
     }
 
-    async function processImg(file) {
+    async function processImg(file, useStamp) {
         return new Promise(resolve => {
             const img = new Image();
-            const src = URL.createObjectURL(file);
-            img.src = src;
+            img.src = URL.createObjectURL(file);
             img.onload = async () => {
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
@@ -303,35 +278,28 @@
                 const w = img.width * scale, h = img.height * scale;
                 ctx.drawImage(img, (canvas.width-w)/2, (canvas.height-h)/2, w, h);
                 
-                if(stampCheck.checked && selectedStampNum) {
-                    const stamp = new Image();
-                    stamp.src = `限定${selectedStampNum}.png`; 
-                    await new Promise(r => { stamp.onload = r; stamp.onerror = r; });
+                if(useStamp && selectedStamp) {
+                    const sImg = new Image();
+                    sImg.src = `限定${selectedStamp}.png`;
+                    await new Promise(r => { sImg.onload = r; sImg.onerror = r; });
                     const sw = canvas.width * 0.85;
-                    const sh = (stamp.height/stamp.width) * sw;
-                    ctx.drawImage(stamp, (canvas.width-sw)/2, (canvas.height-sh)/2 + (canvas.height*0.07), sw, sh);
+                    const sh = (sImg.height/sImg.width) * sw;
+                    ctx.drawImage(sImg, (canvas.width-sw)/2, (canvas.height-sh)/2 + (canvas.height*0.07), sw, sh);
                 }
-                URL.revokeObjectURL(src);
-                canvas.toBlob(resolve, 'image/png', 0.92);
+                URL.revokeObjectURL(img.src);
+                canvas.toBlob(resolve, 'image/png');
             };
         });
     }
 
-    dlBtn.onclick = () => {
-        allBlobs.forEach((blob, i) => {
+    document.getElementById('downloadBtn').onclick = () => {
+        processedFiles.forEach((item, i) => {
             setTimeout(() => {
                 const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = `Poster_${i+1}.png`;
+                a.href = item.url; a.download = item.name;
                 a.click();
             }, i * 300);
         });
-    };
-
-    const stampWrap = document.getElementById('stampWrap');
-    document.getElementById('expandBtn').onclick = function() {
-        const isExp = stampWrap.classList.toggle('expand');
-        this.innerText = isExp ? '收起样式 ▲' : '展开样式 ▾';
     };
 </script>
 </body>
