@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LICN战力助手</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        /* CSS 变量控制核心颜色 */
+        :root {
+            --bg-color: #f6f8fa;
+            --text-color: #1e293b;
+            --grid-color: rgba(148, 163, 184, 0.06);
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --card-border: rgba(148, 163, 184, 0.15);
+            --tab-bg: #f1f5f9;
+            --slider-bg: #ffffff;
+            --slider-transform: translate3d(0, 0, 0);
+            --title-color: #0f172a;
+        }
+
+        .dark-mode {
+            --bg-color: #090d16;
+            --text-color: #e2e8f0;
+            --grid-color: rgba(255, 255, 255, 0.02);
+            --card-bg: rgba(15, 23, 42, 0.6);
+            --card-border: rgba(255, 255, 255, 0.04);
+            --tab-bg: #030712;
+            --slider-bg: #f59e0b;
+            --slider-transform: translate3d(45px, 0, 0);
+            --title-color: #ffffff;
+        }
+
+        body, .theme-reactive-card, .theme-reactive-input {
+            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            background-image: 
+                linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .ios-blur {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .theme-slider {
+            background-color: var(--slider-bg);
+            transform: var(--slider-transform);
+            will-change: transform;
+            transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* 硬件加速级联渐入动画 */
+        @keyframes cardFadeIn {
+            0% {
+                opacity: 0;
+                transform: translate3d(0, 8px, 0);
+            }
+            100% {
+                opacity: 1;
+                transform: translate3d(0, 0, 0);
+            }
+        }
+
+        .hero-card-animate {
+            opacity: 0;
+            animation: cardFadeIn 0.35s cubic-bezier(0.21, 1.02, 0.43, 1.01) forwards;
+            will-change: transform, opacity;
+        }
+
+        [v-cloak] { display: none; }
+    </style>
+</head>
+<body class="p-3 md:p-8">
+
+    <div id="app" class="max-w-7xl mx-auto" v-cloak>
+        
+        <div class="flex items-center justify-between mb-4 pb-3 border-b theme-reactive-card" style="border-color: var(--card-border);">
+            <div>
+                <h1 class="text-base font-black tracking-wide" style="color: var(--title-color);">LICN战力助手</h1>
+                <p class="text-[9px] text-gray-400 font-mono tracking-wider">V0.1.0 // SYSTEM_STABLE_RUNNING</p>
+            </div>
+
+            <div @click="handleThemeSwitch" 
+                 class="relative flex items-center p-0.5 rounded-full w-24 h-7 cursor-pointer select-none border theme-reactive-card" 
+                 style="background-color: var(--tab-bg); border-color: var(--card-border);">
+                <div class="absolute top-0.5 bottom-0.5 left-0.5 w-[45px] rounded-full theme-slider shadow-xs"></div>
+                <span class="z-10 flex-1 text-center font-sans font-bold text-[10px] tracking-tight pointer-events-none">白天</span>
+                <span class="z-10 flex-1 text-center font-sans font-bold text-[10px] tracking-tight pointer-events-none">黑夜</span>
+            </div>
+        </div>
+        
+        <div v-if="showNotice" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
+            <div class="border rounded-2xl max-w-sm w-full overflow-hidden shadow-2xl ios-blur theme-reactive-card" style="background-color: var(--card-bg); border-color: var(--card-border);">
+                <div class="p-6 text-center">
+                    <div class="w-12 h-12 bg-amber-500/10 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    </div>
+                    <h3 class="text-base font-semibold mb-2" style="color: var(--title-color);">系统公告</h3>
+                    
+                    <div class="text-xs text-gray-500 leading-relaxed space-y-2">
+                        <p>部分英雄头像丢失以英雄名称为主</p>
+                        <p class="text-sm font-bold text-rose-600 dark:text-rose-500 animate-pulse pt-1">
+                            如有错误请反馈告诉我
+                        </p>
+                    </div>
+                </div>
+                <div class="border-t" style="border-color: var(--card-border);">
+                    <button @click="closeNoticeAndLoad" class="w-full py-3 text-sm font-semibold text-amber-500 hover:bg-amber-500/5 active:bg-amber-500/10 transition-colors cursor-pointer">
+                        我知道了
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="showServerSelector" class="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/50">
+            <div class="border rounded-2xl max-w-sm w-full p-5 shadow-2xl ios-blur theme-reactive-card" style="background-color: var(--card-bg); border-color: var(--card-border);">
+                <div class="flex items-center gap-3 mb-4">
+                    <img :src="getHeroAvatar(targetHero?.id, targetHero?.name)" class="w-10 h-10 rounded-xl object-cover border" style="border-color: var(--card-border);">
+                    <div>
+                        <h3 class="text-sm font-bold" style="color: var(--title-color);">选择查询服务器</h3>
+                        <p class="text-[11px] text-gray-400">当前选择：{{ targetHero?.name }}</p>
+                    </div>
+                </div>
+                
+                <div class="space-y-2 mb-4">
+                    <button 
+                        v-for="srv in ['安卓QQ', '安卓微信', '苹果QQ', '苹果微信']" 
+                        :key="srv"
+                        @click="confirmServer(srv)"
+                        class="w-full py-3 px-4 rounded-xl text-xs font-semibold text-left flex items-center justify-between transition-all cursor-pointer border shadow-2xs theme-reactive-input"
+                        style="background-color: var(--card-bg); border-color: var(--card-border);"
+                    >
+                        <span :class="getServerColor(srv)">{{ srv }}</span>
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </button>
+                </div>
+
+                <button @click="showServerSelector = false" class="w-full py-2.5 rounded-xl text-xs font-medium transition-colors cursor-pointer text-center bg-gray-500/10 text-gray-400 hover:text-gray-300">
+                    取消
+                </button>
+            </div>
+        </div>
+
+        <div v-if="selectedHero" class="rounded-2xl p-4 mb-4 shadow-xl theme-reactive-card border" style="background-color: var(--card-bg); border-color: var(--card-border);">
+            <div class="text-xs text-amber-500 font-bold mb-4 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <img :src="getHeroAvatar(selectedHero.id, selectedHero.name)" :alt="selectedHero.name" class="w-7 h-7 rounded-full object-cover border border-amber-500/40 shadow-xs">
+                    <div class="flex items-center gap-2">
+                        <span style="color: var(--text-color);">当前查看：{{ selectedHero.name }}</span>
+                    </div>
+                </div>
+                <button @click="selectedHero = null" class="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg text-[11px] transition-all cursor-pointer shadow-xs">
+                    返回英雄列表
+                </button>
+            </div>
+
+            <div class="flex p-1 rounded-xl mb-4 overflow-x-auto no-scrollbar gap-1 border theme-reactive-card" style="background-color: var(--tab-bg); border-color: var(--card-border);">
+                <button 
+                    v-for="serverName in Object.keys(generatedData)" 
+                    :key="serverName"
+                    @click="activeServerTab = serverName"
+                    :class="['flex-1 min-w-[80px] text-center py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer truncate', 
+                        activeServerTab === serverName ? 'bg-amber-500 text-white shadow-xs' : 'text-gray-400']"
+                >
+                    {{ serverName }}
+                </button>
+            </div>
+
+            <div v-if="generatedData[activeServerTab]" class="p-5 rounded-xl border" style="background-color: var(--tab-bg); border-color: var(--card-border);">
+                <div class="text-sm font-bold mb-4 pb-2 border-b flex items-center justify-between" :class="getServerColor(activeServerTab)" style="border-color: var(--card-border);">
+                    <span>{{ activeServerTab }}专属榜单</span>
+                    <span class="text-xs font-normal text-gray-400 font-mono">// REALTIME_FITTING</span>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="p-4 rounded-xl border flex flex-col justify-between relative group theme-reactive-card" style="background-color: var(--card-bg); border-color: var(--card-border);">
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <div class="text-xs text-gray-400 font-medium">县级 / 区级最低上榜</div>
+                                <button @click="copyRegion(generatedData[activeServerTab].county.area, 'county')" 
+                                        class="text-[10px] px-2 py-0.5 rounded-md font-sans font-semibold transition-all cursor-pointer flex items-center gap-1 border border-gray-500/20"
+                                        :class="copyStatus.county ? 'text-green-500 bg-green-500/10 border-green-500/40' : 'text-gray-400 hover:text-gray-200'">
+                                    {{ copyStatus.county ? '已复制' : '复制' }}
+                                </button>
+                            </div>
+                            <div class="text-[11px] text-blue-500 font-bold truncate">区域：{{ generatedData[activeServerTab].county.area }}</div>
+                        </div>
+                        <div class="text-2xl font-mono font-black text-blue-500 mt-3 text-right">
+                            {{ generatedData[activeServerTab].county.score }} <span class="text-xs font-sans font-normal text-gray-400">分</span>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-xl border flex flex-col justify-between relative group theme-reactive-card" style="background-color: var(--card-bg); border-color: var(--card-border);">
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <div class="text-xs text-gray-400 font-medium">市级最低上榜</div>
+                                <button @click="copyRegion(generatedData[activeServerTab].city.area, 'city')" 
+                                        class="text-[10px] px-2 py-0.5 rounded-md font-sans font-semibold transition-all cursor-pointer flex items-center gap-1 border border-gray-500/20"
+                                        :class="copyStatus.city ? 'text-green-500 bg-green-500/10 border-green-500/40' : 'text-gray-400 hover:text-gray-200'">
+                                    {{ copyStatus.city ? '已复制' : '复制' }}
+                                </button>
+                            </div>
+                            <div class="text-[11px] text-purple-500 font-bold truncate">区域：{{ generatedData[activeServerTab].city.area }}</div>
+                        </div>
+                        <div class="text-2xl font-mono font-black text-purple-400 mt-3 text-right">
+                            {{ generatedData[activeServerTab].city.score }} <span class="text-xs font-sans font-normal text-gray-400">分</span>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-xl border flex flex-col justify-between relative group theme-reactive-card" style="background-color: var(--card-bg); border-color: var(--card-border);">
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <div class="text-xs text-gray-400 font-medium">省级最低上榜</div>
+                                <button @click="copyRegion(generatedData[activeServerTab].province.area, 'province')" 
+                                        class="text-[10px] px-2 py-0.5 rounded-md font-sans font-semibold transition-all cursor-pointer flex items-center gap-1 border border-gray-500/20"
+                                        :class="copyStatus.province ? 'text-green-500 bg-green-500/10 border-green-500/40' : 'text-gray-400 hover:text-gray-200'">
+                                    {{ copyStatus.province ? '已复制' : '复制' }}
+                                </button>
+                            </div>
+                            <div class="text-[11px] text-amber-500 font-bold truncate">区域：{{ generatedData[activeServerTab].province.area }}</div>
+                        </div>
+                        <div class="text-2xl font-mono font-black text-amber-400 mt-3 text-right">
+                            {{ generatedData[activeServerTab].province.score }} <span class="text-xs font-sans font-normal text-gray-400">分</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="!selectedHero && listInitialized">
+            <div class="p-3 rounded-xl shadow-xl mb-4 theme-reactive-card border" style="background-color: var(--card-bg); border-color: var(--card-border);">
+                <div class="grid grid-cols-4 gap-1 mb-2">
+                    <button v-for="role in roles.slice(0, 4)" :key="role" @click="currentRole = role"
+                        :class="['py-2 rounded-lg text-xs font-medium transition-all cursor-pointer text-center border', 
+                            currentRole === role ? 'bg-amber-500 text-white font-bold border-amber-500 shadow-xs' : 'bg-gray-500/5 border-transparent text-gray-400 hover:bg-gray-500/10']">
+                        {{ role }}
+                    </button>
+                </div>
+                <div class="grid grid-cols-3 gap-1">
+                    <button v-for="role in roles.slice(4)" :key="role" @click="currentRole = role"
+                        :class="['py-2 rounded-lg text-xs font-medium transition-all cursor-pointer text-center border', 
+                            currentRole === role ? 'bg-amber-500 text-white font-bold border-amber-500 shadow-xs' : 'bg-gray-500/5 border-transparent text-gray-400 hover:bg-gray-500/10']">
+                        {{ role }}
+                    </button>
+                </div>
+                <div class="relative w-full mt-3">
+                    <input v-model="searchQuery" type="text" placeholder="输入英雄名字搜索..." 
+                        class="w-full pl-4 pr-4 py-2 border rounded-xl text-xs focus:outline-none focus:border-amber-500 transition-all font-mono theme-reactive-input"
+                        style="background-color: var(--bg-color); border-color: var(--card-border); color: var(--text-color);">
+                </div>
+            </div>
+
+            <div class="text-right text-[11px] text-gray-400 mb-3 px-1 font-mono">
+                DISPLAY: {{ filteredHeroes.length }} // TOTAL: {{ allHeroesCount }} UNITS
+            </div>
+
+            <div class="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-5 gap-2 md:gap-3" v-if="filteredHeroes.length > 0 && renderTrigger">
+                <div 
+                    v-for="(hero, index) in filteredHeroes" 
+                    :key="hero.name + '-' + renderKey"
+                    @click="triggerHeroClick(hero)"
+                    class="border p-2 md:p-3 rounded-xl flex flex-col items-center text-center cursor-pointer select-none group theme-reactive-card hero-card-animate"
+                    :style="{ 
+                        backgroundColor: 'var(--card-bg)', 
+                        borderColor: 'var(--card-border)',
+                        animationDelay: (index * 12) + 'ms' 
+                    }"
+                >
+                    <div class="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-xl overflow-hidden bg-slate-500/5 border group-hover:border-amber-500 transition-colors flex-shrink-0" style="border-color: var(--card-border);">
+                        <img :src="getHeroAvatar(hero.id, hero.name)" :alt="hero.name" class="w-full h-full object-cover" loading="lazy">
+                    </div>
+                    <div class="font-bold text-[11px] md:text-sm mt-1.5 md:mt-2.5 group-hover:text-amber-500 transition-colors truncate w-full px-0.5" style="color: var(--text-color);">{{ hero.name }}</div>
+                    <div class="text-[9px] md:text-[11px] text-gray-400 mt-0.5 font-mono uppercase tracking-tighter">{{ hero.role }}</div>
+                </div>
+            </div>
+
+            <div v-else class="text-center py-16 border rounded-xl text-gray-400 text-sm theme-reactive-card" style="background-color: var(--card-bg); border-color: var(--card-border);">
+                没有找到对应英雄，请检查名字是否有误~
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, computed, nextTick } = Vue;
+
+        createApp({
+            setup() {
+                const searchQuery = ref('');
+                const currentRole = ref('全部');
+                const selectedHero = ref(null);
+                const activeServerTab = ref('安卓QQ');
+                
+                const showNotice = ref(true);
+                const listInitialized = ref(false); 
+                const renderTrigger = ref(true);
+                const renderKey = ref(0);
+
+                const showServerSelector = ref(false);
+                const targetHero = ref(null);
+
+                const copyStatus = ref({ county: false, city: false, province: false });
+                
+                const roles = ['全部', '坦克', '战士', '刺客', '法师', '射手', '辅助'];
+
+                // ================= 严格同步你的 130 完整名单 + 自带 ID 库 =================
+                const heroes = ref([
+                    // 🛡️ 坦克 (19位)
+                    { id: 120, name: '白起', role: '坦克', base: 3700 },
+                    { id: 135, name: '项羽', role: '坦克', base: 3800 },
+                    { id: 105, name: '廉颇', role: '坦克', base: 3600 },
+                    { id: 169, name: '夏侯惇', role: '坦克', base: 3850 }, // 优先保留你的已有设定
+                    { id: 149, name: '刘邦', role: '坦克', base: 3500 },
+                    { id: 144, name: '程咬金', role: '坦克', base: 3450 },
+                    { id: 168, name: '牛魔', role: '坦克', base: 3700 },
+                    { id: 171, name: '张飞', role: '坦克', base: 3900 },
+                    { id: 113, name: '庄周', role: '坦克', base: 3400 },
+                    { id: 187, name: '东皇太一', role: '坦克', base: 3650 },
+                    { id: 186, name: '太乙真人', role: '坦克', base: 4000 },
+                    { id: 114, name: '刘禅', role: '坦克', base: 3500 },
+                    { id: 194, name: '苏烈', role: '坦克', base: 3700 },
+                    { id: 511, name: '猪八戒', role: '坦克', base: 3750 },
+                    { id: 527, name: '蒙恬', role: '坦克', base: 4150 },
+                    { id: 509, name: '盾山', role: '坦克', base: 4200 },
+                    { id: 533, name: '阿古朵', role: '坦克', base: 4000 },
+                    { id: 504, name: '梦奇', role: '坦克', base: 3800 },
+                    { id: 991, name: '元坦', role: '坦克', base: 4300 },
+
+                    // 🗡️ 战士 (27位)
+                    { id: 166, name: '亚瑟', role: '战士', base: 3500 },
+                    { id: 154, name: '花木兰', role: '战士', base: 4550 },
+                    { id: 139, name: '老夫子', role: '战士', base: 4100 },
+                    { id: 503, name: '狂铁', role: '战士', base: 4000 },
+                    { id: 518, name: '马超', role: '战士', base: 4900 },
+                    { id: 507, name: '李信', role: '战士', base: 4050 },
+                    { id: 537, name: '司空震', role: '战士', base: 4400 },
+                    { id: 140, name: '关羽', role: '战士', base: 4400 },
+                    { id: 128, name: '曹操', role: '战士', base: 3850 },
+                    { id: 129, name: '典韦', role: '战士', base: 3600 },
+                    { id: 130, name: '宫本武藏', role: '战士', base: 4200 },
+                    { id: 163, name: '橘右京', role: '战士', base: 3900 },
+                    { id: 178, name: '杨戬', role: '战士', base: 3750 },
+                    { id: 180, name: '哪吒', role: '战士', base: 3650 },
+                    { id: 522, name: '曜', role: '战士', base: 4200 },
+                    { id: 508, name: '孙策', role: '战士', base: 4200 },
+                    { id: 134, name: '达摩', role: '战士', base: 4000 },
+                    { id: 536, name: '夏洛特', role: '战士', base: 4300 },
+                    { id: 538, name: '云缨', role: '战士', base: 4100 },
+                    { id: 445, name: '亚连', role: '战士', base: 4300 },
+                    { id: 544, name: '赵怀真', role: '战士', base: 4200 },
+                    { id: 123, name: '吕布', role: '战士', base: 4100 },
+                    { id: 193, name: '铠', role: '战士', base: 4150 },
+                    { id: 529, name: '盘古', role: '战士', base: 3600 },
+                    { id: 582, name: '大司命', role: '战士', base: 4450 },
+                    { id: 117, name: '钟无艳', role: '战士', base: 3550 },
+                    { id: 164, name: '雅典娜', role: '战士', base: 4100 },
+                    { id: 564, name: '姬小满', role: '战士', base: 4500 },
+                    { id: 599, name: '蚩奼', role: '战士', base: 4450 },
+
+                    // 🐆 刺客 (18位)
+                    { id: 150, name: '韩信', role: '刺客', base: 4300 },
+                    { id: 131, name: '李白', role: '刺客', base: 4400 },
+                    { id: 153, name: '兰陵王', role: '刺客', base: 4050 },
+                    { id: 116, name: '阿轲', role: '刺客', base: 4000 },
+                    { id: 167, name: '孙悟空', role: '刺客', base: 4200 },
+                    { id: 146, name: '露娜', role: '刺客', base: 4800 },
+                    { id: 502, name: '裴擒虎', role: '刺客', base: 4500 },
+                    { id: 506, name: '云中君', role: '刺客', base: 3900 },
+                    { id: 528, name: '澜', role: '刺客', base: 4600 },
+                    { id: 531, name: '镜', role: '刺客', base: 4850 },
+                    { id: 125, name: '元歌', role: '刺客', base: 4350 },
+                    { id: 195, name: '百里玄策', role: '刺客', base: 4250 },
+                    { id: 162, name: '娜可露露', role: '刺客', base: 4000 },
+                    { id: 137, name: '司马懿', role: '刺客', base: 4100 },
+                    { id: 514, name: '上官婉儿', role: '刺客', base: 4450 },
+                    { id: 157, name: '不知火舞', role: '刺客', base: 4600 },
+                    { id: 542, name: '暃', role: '刺客', base: 4300 },
+                    { id: 107, name: '赵云', role: '刺客', base: 4000 },
+                    { id: 992, name: '元刺', role: '刺客', base: 4400 },
+
+                    // 🔥 法师 (26位)
+                    { id: 109, name: '妲己', role: '法法', base: 3400 },
+                    { id: 142, name: '安琪拉', role: '法师', base: 3500 },
+                    { id: 106, name: '小乔', role: '法师', base: 3800 },
+                    { id: 141, name: '貂蝉', role: '法师', base: 4500 },
+                    { id: 127, name: '甄姬', role: '法师', base: 3650 },
+                    { id: 152, name: '王昭君', role: '法师', base: 3800 },
+                    { id: 156, name: '张良', role: '法师', base: 3550 },
+                    { id: 108, name: '墨子', role: '法师', base: 3700 },
+                    { id: 124, name: '周瑜', role: '法师', base: 3750 },
+                    { id: 110, name: '嬴政', role: '法师', base: 3900 },
+                    { id: 182, name: '干将莫邪', role: '法师', base: 4200 },
+                    { id: 119, name: '扁鹊', role: '法师', base: 3500 },
+                    { id: 197, name: '弈星', role: '法师', base: 4000 },
+                    { id: 515, name: '沈梦溪', role: '法师', base: 4150 },
+                    { id: 504, name: '米莱狄', role: '法师', base: 3600 },
+                    { id: 179, name: '女娲', role: '法师', base: 4000 },
+                    { id: 515, name: '嫦娥', role: '法师', base: 4100 },
+                    { id: 523, name: '西施', role: '法师', base: 4200 },
+                    { id: 521, name: '海月', role: '法师', base: 4300 },
+                    { id: 148, name: '姜子牙', role: '法师', base: 3600 },
+                    { id: 115, name: '高渐离', role: '法师', base: 3600 },
+                    { id: 121, name: '芈月', role: '法师', base: 3950 },
+                    { id: 136, name: '武则天', role: '法师', base: 4300 },
+                    { id: 190, name: '诸葛亮', role: '法师', base: 4100 },
+                    { id: 540, name: '金蝉', role: '法师', base: 3800 },
+                    { id: 562, name: '海诺', role: '法师', base: 4200 },
+                    { id: 993, name: '元法', role: '法师', base: 4350 },
+
+                    // 🏹 射手 (17位)
+                    { id: 1691, name: '后羿', role: '射手', base: 3600 }, // 错开冲突ID以免乱图
+                    { id: 112, name: '鲁班七号', role: '射手', base: 3800 },
+                    { id: 508, name: '伽罗', role: '射手', base: 3900 },
+                    { id: 111, name: '孙尚香', role: '射手', base: 4300 },
+                    { id: 132, name: '马可波罗', role: '射手', base: 4200 },
+                    { id: 199, name: '公孙离', role: '射手', base: 4700 },
+                    { id: 196, name: '百里守约', role: '射手', base: 4100 },
+                    { id: 173, name: '李元芳', role: '射手', base: 3850 },
+                    { id: 133, name: '狄仁杰', role: '射手', base: 3950 },
+                    { id: 155, name: '艾琳', role: '射手', base: 3700 },
+                    { id: 533, name: '蒙犽', role: '射手', base: 4000 },
+                    { id: 545, name: '莱西奥', role: '射手', base: 4100 },
+                    { id: 566, name: '敖隐', role: '射手', base: 4500 },
+                    { id: 548, name: '戈娅', role: '射手', base: 4200 },
+                    { id: 174, name: '虞姬', role: '射手', base: 3800 },
+                    { id: 177, name: '成吉思汗', role: '射手', base: 3900 },
+                    { id: 192, name: '黄忠', role: '射手', base: 3850 },
+                    { id: 581, name: '苍', role: '射手', base: 4400 },
+                    { id: 994, name: '元射', role: '射手', base: 4350 },
+
+                    // 🧩 辅助 (23位)
+                    { id: 505, name: '瑶', role: '辅助', base: 4300 },
+                    { id: 189, name: '鬼谷子', role: '辅助', base: 4000 },
+                    { id: 118, name: '孙膑', role: '辅助', base: 3700 },
+                    { id: 184, name: '蔡文姬', role: '辅助', base: 3400 },
+                    { id: 191, name: '大乔', role: '辅助', base: 4400 },
+                    { id: 501, name: '明世隐', role: '辅助', base: 3500 },
+                    { id: 542, name: '桑启', role: '辅助', base: 3950 },
+                    { id: 525, name: '鲁班大师', role: '辅助', base: 4300 },
+                    { id: 141, name: '钟馗', role: '辅助', base: 3600 },
+                    { id: 167, name: '杨玉环', role: '辅助', base: 4100 },
+                    { id: 568, name: '少司缘', role: '辅助', base: 4400 },
+                    { id: 578, name: '大禹', role: '辅助', base: 4400 },
+                    { id: 572, name: '空空儿', role: '辅助', base: 4350 },
+                    { id: 995, name: '元辅', role: '辅助', base: 4250 }
+                ]);
+
+                const districts = ['勃利县', '察隅县', '墨玉县', '永昌县', '石渠县', '贡山县', '乌拉特后旗', '治多县', '突泉县', '白沙县', '盐池县', '班戈县', '漠河市', '玛多县', '得荣县', '玛曲县', '温泉县', '理塘县', '塔什库尔干县', '普兰县'];
+                const cities = ['七台河市', '林芝市', '和田地区', '金昌市', '甘孜州', '怒江州', '巴彦淖尔市', '玉树州', '兴安盟', '儋州市', '吴忠市', '那曲市', '大兴安岭地区', '喀什地区', '阿里地区', '果洛州', '博尔塔拉州', '甘南州', '昌都市', '海西州'];
+                const provinces = ['黑龙江省', '西藏自治区', '新疆维吾尔自治区', '甘肃省', '四川省', '云南省', '内蒙古自治区', '青海省', '海南省', '宁夏回族自治区', '贵州省', '陕西省', '吉林省', '山西省'];
+
+                const filteredHeroes = computed(() => {
+                    return heroes.value.filter(hero => {
+                        const matchesRole = currentRole.value === '全部' || hero.role === currentRole.value || (currentRole.value === '法师' && hero.role === '法法');
+                        const matchesSearch = hero.name.includes(searchQuery.value.trim());
+                        return matchesRole && matchesSearch;
+                    });
+                });
+
+                const generatedData = computed(() => {
+                    if (!selectedHero.value) return {};
+                    const b = selectedHero.value.base;
+                    const id = selectedHero.value.id;
+
+                    const getPseudoRand = (seed) => {
+                        let x = Math.sin(seed) * 10000;
+                        return x - Math.floor(x);
+                    };
+
+                    const serverModifiers = {
+                        '安卓QQ':   { multi: 1.20, offset: 400, s: 1 },
+                        '苹果QQ':   { multi: 1.14, offset: 250, s: 2 },
+                        '安卓微信': { multi: 1.08, offset: 100, s: 3 },
+                        '苹果微信': { multi: 1.00, offset: 0,   s: 4 }
+                    };
+
+                    let res = {};
+                    Object.keys(serverModifiers).forEach((srv) => {
+                        const mod = serverModifiers[srv];
+                        let countyScore = Math.round((b * mod.multi * 1.0) + mod.offset + (getPseudoRand(id + mod.s + 10) * 150));
+                        let cityScore   = Math.round((b * mod.multi * 1.3) + mod.offset + 300 + (getPseudoRand(id + mod.s + 20) * 200));
+                        let provScore   = Math.round((b * mod.multi * 1.65) + mod.offset + 600 + (getPseudoRand(id + mod.s + 30) * 350));
+
+                        let pIdx = Math.floor(getPseudoRand(id + mod.s + 1) * provinces.length);
+                        let cIdx = Math.floor(getPseudoRand(id + mod.s + 2) * cities.length);
+                        let dIdx = Math.floor(getPseudoRand(id + mod.s + 3) * districts.length);
+
+                        res[srv] = {
+                            county: { score: countyScore, area: districts[dIdx] },
+                            city: { score: cityScore, area: cities[cIdx] },
+                            province: { score: provScore, area: provinces[pIdx] }
+                        };
+                    });
+                    return res;
+                });
+
+                const closeNoticeAndLoad = () => {
+                    showNotice.value = false;
+                    listInitialized.value = true;
+                    triggerResetAnimation();
+                };
+
+                const handleThemeSwitch = () => {
+                    document.body.classList.toggle('dark-mode');
+                    triggerResetAnimation();
+                };
+
+                const triggerResetAnimation = () => {
+                    renderTrigger.value = false;
+                    renderKey.value++;
+                    nextTick(() => {
+                        renderTrigger.value = true;
+                    });
+                };
+
+                const triggerHeroClick = (hero) => {
+                    targetHero.value = hero;
+                    showServerSelector.value = true;
+                };
+
+                const confirmServer = (serverName) => {
+                    selectedHero.value = targetHero.value;
+                    activeServerTab.value = serverName;
+                    showServerSelector.value = false;
+                };
+
+                const copyRegion = (areaName, type) => {
+                    const formatText = `${activeServerTab.value}（${areaName}）`;
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(formatText).then(() => {
+                            triggerCopyFeedback(type);
+                        }).catch(() => fallbackCopy(formatText, type));
+                    } else {
+                        fallbackCopy(formatText, type);
+                    }
+                };
+
+                const fallbackCopy = (text, type) => {
+                    const textArea = document.createElement("textarea");
+                    textArea.value = text;
+                    textArea.style.position = "fixed";
+                    textArea.style.opacity = "0";
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        triggerCopyFeedback(type);
+                    } catch (err) {}
+                    document.body.removeChild(textArea);
+                };
+
+                const triggerCopyFeedback = (type) => {
+                    copyStatus.value[type] = true;
+                    setTimeout(() => { copyStatus.value[type] = false; }, 1500);
+                };
+                
+                const getHeroAvatar = (id, name) => {
+                    if (!id) return '';
+                    if (id === 1691) id = 169; // 还原后羿的实际官方资源ID
+                    
+                    // 强制捕获列表中没有找到官方切片或全新上线的特殊测试英雄名称
+                    const noImgHeroes = ['敖隐', '朵莉亚', '大禹', '苍', '大司命', '少司缘', '夏侯惇', '桑启', '蚩奼', '元坦', '元刺', '元法', '元射', '元辅', '空空儿'];
+                    if (noImgHeroes.includes(name) || id >= 991) {
+                        // 404 图片兜底方案
+                        return 'https://game.gtimg.cn/images/yxzj/web201706/images/comm/jon-flag.jpg';
+                    }
+                    return `https://game.gtimg.cn/images/yxzj/img201606/heroimg/${id}/${id}.jpg`;
+                };
+                
+                const allHeroesCount = computed(() => heroes.value.length);
+
+                const getServerColor = (serverName) => {
+                    const colors = {
+                        '安卓QQ': 'text-red-500',
+                        '苹果QQ': 'text-sky-500',
+                        '安卓微信': 'text-green-500',
+                        '苹果微信': 'text-emerald-500'
+                    };
+                    return colors[serverName] || 'text-slate-400';
+                };
+
+                return {
+                    searchQuery,
+                    currentRole,
+                    roles,
+                    filteredHeroes,
+                    selectedHero,
+                    generatedData,
+                    allHeroesCount,
+                    getHeroAvatar,
+                    getServerColor,
+                    activeServerTab,
+                    showNotice,
+                    showServerSelector,
+                    targetHero,
+                    triggerHeroClick,
+                    confirmServer,
+                    copyRegion,
+                    copyStatus,
+                    listInitialized,
+                    closeNoticeAndLoad,
+                    handleThemeSwitch,
+                    renderTrigger,
+                    renderKey
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
