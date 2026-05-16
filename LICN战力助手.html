@@ -256,10 +256,20 @@
                         {{ role }}
                     </button>
                 </div>
-                <div class="relative w-full mt-3">
+                
+                <div class="relative w-full mt-3 flex items-center">
                     <input v-model="searchQuery" type="text" placeholder="输入英雄名字搜索..." 
-                        class="w-full pl-4 pr-4 py-2 border rounded-xl text-xs focus:outline-none focus:border-amber-500 transition-all font-mono theme-reactive-input"
+                        class="w-full pl-4 pr-10 py-2 border rounded-xl text-xs focus:outline-none focus:border-amber-500 transition-all font-mono theme-reactive-input"
                         style="background-color: var(--bg-color); border-color: var(--card-border); color: var(--text-color);">
+                    <button v-if="searchQuery.trim().length > 0" 
+                        @click="clearSearch"
+                        class="absolute right-3 p-1 rounded-full text-gray-400 hover:text-amber-500 hover:bg-gray-500/10 active:bg-gray-500/20 transition-all cursor-pointer"
+                        title="清空搜索内容"
+                    >
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
                 </div>
             </div>
 
@@ -321,7 +331,7 @@
                     { id: 120, name: '白起', role: '坦克', base: 3700 },
                     { id: 135, name: '项羽', role: '坦克', base: 3800 },
                     { id: 105, name: '廉颇', role: '坦克', base: 3600 },
-                    { id: 169, name: '夏侯惇', role: '坦克', base: 3850 }, // 优先保留你的已有设定
+                    { id: 169, name: '夏侯惇', role: '坦克', base: 3850 },
                     { id: 149, name: '刘邦', role: '坦克', base: 3500 },
                     { id: 144, name: '程咬金', role: '坦克', base: 3450 },
                     { id: 168, name: '牛魔', role: '坦克', base: 3700 },
@@ -420,7 +430,7 @@
                     { id: 993, name: '元法', role: '法师', base: 4350 },
 
                     // 🏹 射手 (17位)
-                    { id: 1691, name: '后羿', role: '射手', base: 3600 }, // 错开冲突ID以免乱图
+                    { id: 1691, name: '后羿', role: '射手', base: 3600 },
                     { id: 112, name: '鲁班七号', role: '射手', base: 3800 },
                     { id: 508, name: '伽罗', role: '射手', base: 3900 },
                     { id: 111, name: '孙尚香', role: '射手', base: 4300 },
@@ -517,6 +527,12 @@
                     triggerResetAnimation();
                 };
 
+                // 清除搜索逻辑并触发重新加载动画
+                const clearSearch = () => {
+                    searchQuery.value = '';
+                    triggerResetAnimation();
+                };
+
                 const triggerResetAnimation = () => {
                     renderTrigger.value = false;
                     renderKey.value++;
@@ -568,12 +584,10 @@
                 
                 const getHeroAvatar = (id, name) => {
                     if (!id) return '';
-                    if (id === 1691) id = 169; // 还原后羿的实际官方资源ID
+                    if (id === 1691) id = 169;
                     
-                    // 强制捕获列表中没有找到官方切片或全新上线的特殊测试英雄名称
                     const noImgHeroes = ['敖隐', '朵莉亚', '大禹', '苍', '大司命', '少司缘', '夏侯惇', '桑启', '蚩奼', '元坦', '元刺', '元法', '元射', '元辅', '空空儿'];
                     if (noImgHeroes.includes(name) || id >= 991) {
-                        // 404 图片兜底方案
                         return 'https://game.gtimg.cn/images/yxzj/web201706/images/comm/jon-flag.jpg';
                     }
                     return `https://game.gtimg.cn/images/yxzj/img201606/heroimg/${id}/${id}.jpg`;
@@ -613,7 +627,8 @@
                     closeNoticeAndLoad,
                     handleThemeSwitch,
                     renderTrigger,
-                    renderKey
+                    renderKey,
+                    clearSearch
                 };
             }
         }).mount('#app');
