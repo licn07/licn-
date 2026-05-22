@@ -108,7 +108,6 @@
         }
 
         .grid-box { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        .grid-box-triple { grid-template-columns: repeat(3, 1fr); } /* 新增三列布局 */
         
         .card {
             background: var(--card-bg); backdrop-filter: blur(30px) saturate(150%);
@@ -144,11 +143,9 @@
             <span>Poster Service</span>
             <span style="opacity: 0.5;">海报服务</span>
         </div>
-        <!-- 调整为 3 列布局以容纳新按钮 -->
-        <div class="grid-box grid-box-triple">
-            <div class="card" onclick="location.href='海报自定义工具.html'"><span>自定义</span></div>
-            <div class="card" onclick="location.href='海报图库.html'"><span>海报图库</span></div>
-            <div class="card" onclick="window.open('https://jcn101cvl5dk.feishu.cn/wiki/D9V4wqJgviIYXuka2KHcUXJ2nie')"><span>云端知识</span></div>
+        <div class="grid-box">
+            <div class="card" onclick="location.href='海报自定义工具.html'"><span>海报自定义工具</span></div>
+            <div class="card" onclick="location.href='海报图库.html'"><span>进入海报图库</span></div>
         </div>
 
         <div class="group-label">
@@ -166,6 +163,7 @@
         </div>
         <div class="grid-box">
             <div class="card" style="grid-column: span 2; padding: 20px;" onclick="location.href='https://www.likeuuu.top/'"><span>战力查询工具</span></div>
+            <div class="card" style="grid-column: span 2; padding: 20px;" onclick="checkPassword()"><span>云端知识</span></div>
         </div>
     </div>
 
@@ -174,6 +172,15 @@
             const isDark = document.body.classList.toggle('dark-mode');
             document.getElementById('mode-text').innerText = isDark ? "DARK" : "LIGHT";
             if (window.navigator.vibrate) window.navigator.vibrate(5);
+        }
+
+        function checkPassword() {
+            const pass = prompt("请输入访问密码:");
+            if (pass === "licnnb") {
+                window.open('https://jcn101cvl5dk.feishu.cn/wiki/D9V4wqJgviIYXuka2KHcUXJ2nie');
+            } else if (pass !== null) {
+                alert("密码错误");
+            }
         }
 
         function updateMetrics() {
