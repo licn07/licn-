@@ -336,7 +336,7 @@
         });
     }
 
-    // 修复下载逻辑：不再使用延时循环，改为在用户直接点击时触发单次遍历下载
+    // 自动排队下载逻辑
     document.getElementById('downloadBtn').onclick = () => {
         const isLossy = document.getElementById('lossyJpg').checked;
         const isLossless = document.getElementById('losslessPng').checked;
@@ -344,12 +344,21 @@
         const ext = isLossy ? '.jpg' : '.png';
         const suffix = needsSuffix ? '压缩' : '';
         
-        processedFiles.forEach(f => { 
+        let index = 0;
+        const timer = setInterval(() => {
+            if (index >= processedFiles.length) {
+                clearInterval(timer);
+                return;
+            }
+            
+            const f = processedFiles[index];
             const a = document.createElement('a'); 
             a.href = f.url; 
             a.download = f.originalName + suffix + ext; 
-            a.click(); 
-        });
+            a.click();
+            
+            index++;
+        }, 500); // 间隔 500ms 触发，避免被拦截
     };
 </script>
 </body>
