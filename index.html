@@ -23,7 +23,6 @@
             --toggle-bg: rgba(0, 0, 0, 0.05);
         }
 
-        /* 仅在手动触发时激活 */
         .dark-mode {
             --ios-blue: #00CCFF;
             --bg-color: #050505;
@@ -56,7 +55,6 @@
             padding: 40px 20px;
         }
 
-        /* 右上角环境切换 */
         .theme-toggle {
             position: fixed; top: 25px; right: 20px;
             width: 44px; height: 44px;
@@ -110,13 +108,15 @@
         }
 
         .grid-box { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .grid-box-triple { grid-template-columns: repeat(3, 1fr); } /* 新增三列布局 */
+        
         .card {
             background: var(--card-bg); backdrop-filter: blur(30px) saturate(150%);
             -webkit-backdrop-filter: blur(30px) saturate(150%);
             border: 1px solid var(--card-border); border-radius: 20px;
             padding: 24px 10px; display: flex; align-items: center; justify-content: center;
             color: var(--text-main); text-decoration: none; box-shadow: var(--shadow);
-            text-align: center;
+            text-align: center; cursor: pointer;
         }
         .card span { font-size: 0.85rem; font-weight: 700; }
         .card:active { transform: scale(0.96); opacity: 0.8; }
@@ -144,9 +144,11 @@
             <span>Poster Service</span>
             <span style="opacity: 0.5;">海报服务</span>
         </div>
-        <div class="grid-box">
-            <div class="card" onclick="location.href='海报自定义工具.html'"><span>海报自定义工具</span></div>
-            <div class="card" onclick="window.open('https://jcn101cvl5dk.feishu.cn/wiki/D9V4wqJgviIYXuka2KHcUXJ2nie')"><span>进入海报图库</span></div>
+        <!-- 调整为 3 列布局以容纳新按钮 -->
+        <div class="grid-box grid-box-triple">
+            <div class="card" onclick="location.href='海报自定义工具.html'"><span>自定义</span></div>
+            <div class="card" onclick="location.href='海报图库.html'"><span>海报图库</span></div>
+            <div class="card" onclick="window.open('https://jcn101cvl5dk.feishu.cn/wiki/D9V4wqJgviIYXuka2KHcUXJ2nie')"><span>云端知识</span></div>
         </div>
 
         <div class="group-label">
@@ -168,15 +170,12 @@
     </div>
 
     <script>
-        // 仅手动切换逻辑
         function manualToggle() {
             const isDark = document.body.classList.toggle('dark-mode');
             document.getElementById('mode-text').innerText = isDark ? "DARK" : "LIGHT";
-            // 给 Android 16 用户一个小震动反馈
             if (window.navigator.vibrate) window.navigator.vibrate(5);
         }
 
-        // 模拟实时数据
         function updateMetrics() {
             document.getElementById('cpu').innerText = (Math.random() * 2 + 1.2).toFixed(1) + '%';
             document.getElementById('ram').innerText = Math.floor(Math.random() * 30 + 1340) + 'MB';
