@@ -125,21 +125,24 @@
             for (let i = currentIndex; i <= end; i++) {
                 const card = document.createElement('div');
                 card.className = 'poster-card';
-                // 修改路径：增加文件夹路径
-                card.setAttribute('data-src', `${currentCategory}图/${currentCategory}${i}.png`);
-                card.setAttribute('data-wmsrc', `${currentCategory}图/${currentCategory}水印${i}.png`);
+                // 使用根相对路径 /licn-/ 确保在任何页面下都能正确寻址
+                const src = `/licn-/${currentCategory}图/${currentCategory}${i}.png`;
+                const wmSrc = `/licn-/${currentCategory}图/${currentCategory}水印${i}.png`;
+                
+                card.setAttribute('data-src', src);
+                card.setAttribute('data-wmsrc', wmSrc);
                 
                 const imgWrapper = document.createElement('div');
                 imgWrapper.className = 'image-wrapper';
                 
                 const img = document.createElement('img');
                 img.className = 'poster-img';
-                img.src = `${currentCategory}图/${currentCategory}${i}.png`; 
+                img.src = src; 
                 img.loading = "lazy"; 
                 
                 const wmImg = document.createElement('img');
                 wmImg.className = 'wm-img';
-                wmImg.src = `${currentCategory}图/${currentCategory}水印${i}.png`; 
+                wmImg.src = wmSrc; 
                 
                 const numDiv = document.createElement('div');
                 numDiv.className = 'poster-number';
