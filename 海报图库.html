@@ -5,12 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>海报图库</title>
     <style>
-        /* 新增：公告栏样式 */
         .alert-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px; }
         .alert-box { background: #fff; width: 100%; max-width: 300px; padding: 24px; border-radius: 20px; text-align: center; color: #000; }
         .alert-btn { background: #007aff; color: #fff; border: none; width: 100%; padding: 12px; border-radius: 12px; margin-top: 20px; font-weight: bold; cursor: pointer; }
-
-        /* 以下保留你原有的全部 CSS */
         * { -webkit-tap-highlight-color: transparent !important; -webkit-user-select: none; user-select: none; outline: none; box-sizing: border-box; }
         html, body { width: 100%; height: 100%; margin: 0; padding: 0; background-color: #e5e5ea; -webkit-overflow-scrolling: touch; }
         body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; padding: 16px; background-image: linear-gradient(to right, rgba(0, 0, 0, 0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 0, 0, 0.08) 1px, transparent 1px); background-size: 24px 24px; overflow-y: auto; }
@@ -37,7 +34,7 @@
         .overlay-content { position: relative; max-width: 95%; max-height: 85%; opacity: 0; transform: scale3d(0.92, 0.92, 1); transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease; }
         .overlay.active .overlay-content { transform: scale3d(1, 1, 1); opacity: 1; }
         .overlay-img { max-width: 100%; max-height: 80vh; object-fit: contain; border-radius: 12px; display: block; }
-        .overlay-wm { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; z-index: 205; display: none; }
+        .overlay-wm { position: absolute; top: 0; left: 0; width: 100%; width: 100%; height: 100%; object-fit: contain; pointer-events: none; z-index: 205; display: none; }
         .close-btn { position: absolute; top: -44px; right: 0; color: #ffffff; font-size: 30px; cursor: pointer; z-index: 210; padding: 10px; }
     </style>
 </head>
@@ -61,12 +58,12 @@
     <div class="control-bar" id="controlBar">
         <button class="back-btn" onclick="goBack()">返回</button>
         <div class="layout-switch">
-            <button class="toggle-btn active" id="btn2" onclick="switchLayout(2)">两排</button>
-            <button class="toggle-btn" id="btn4" onclick="switchLayout(4)">四排</button>
+            <button class="toggle-btn" id="btn2" onclick="switchLayout(2)">两排</button>
+            <button class="toggle-btn active" id="btn4" onclick="switchLayout(4)">四排</button>
         </div>
     </div>
 
-    <div class="gallery-grid" id="galleryGrid"></div>
+    <div class="gallery-grid cols-4" id="galleryGrid"></div>
     <div id="loadSentinel" style="display:none;">正在加载更多海报...</div>
 
     <div class="overlay" id="imageOverlay" onclick="closeLightbox()">
@@ -115,7 +112,8 @@
             currentCategory = '';
             currentTotal = 0;
             sentinel.innerText = "正在加载更多海报...";
-            switchLayout(2);
+            // 返回时重置回四排默认
+            switchLayout(4);
         }
 
         function loadMorePosters() {
@@ -125,7 +123,6 @@
             for (let i = currentIndex; i <= end; i++) {
                 const card = document.createElement('div');
                 card.className = 'poster-card';
-                // 已修改：删除 /licn-/ 前缀，直接使用文件夹路径
                 const src = `${currentCategory}图/${currentCategory}${i}.png`;
                 const wmSrc = `${currentCategory}图/${currentCategory}水印${i}.png`;
                 
