@@ -39,7 +39,6 @@
     </style>
 </head>
 <body>
-
     <div class="alert-overlay" id="alertModal">
         <div class="alert-box">
             <div style="font-weight:bold; font-size:18px; margin-bottom:12px;">温馨提示</div>
@@ -103,8 +102,6 @@
             currentCategory = type;
             currentTotal = LIMITS[type];
             errorCount = 0;
-            // 修复逻辑：初始加载两批 (16个)，确保铺满屏幕
-            loadMorePosters();
             loadMorePosters();
             initIntersectionObserver();
         }
@@ -130,26 +127,20 @@
                 card.className = 'poster-card';
                 const src = `${currentCategory}图/${currentCategory}${i}.png`;
                 const wmSrc = `${currentCategory}图/${currentCategory}水印${i}.png`;
-                
                 card.setAttribute('data-src', src);
                 card.setAttribute('data-wmsrc', wmSrc);
-                
                 const imgWrapper = document.createElement('div');
                 imgWrapper.className = 'image-wrapper';
-                
                 const img = document.createElement('img');
                 img.className = 'poster-img';
                 img.src = src; 
                 img.loading = "lazy"; 
-                
                 const wmImg = document.createElement('img');
                 wmImg.className = 'wm-img';
                 wmImg.src = wmSrc; 
-                
                 const numDiv = document.createElement('div');
                 numDiv.className = 'poster-number';
                 numDiv.innerText = i; 
-                
                 img.onload = function() { 
                     errorCount = 0;
                     requestAnimationFrame(() => { card.style.opacity = '1'; img.style.opacity = '1'; numDiv.style.opacity = '1'; }); 
@@ -164,7 +155,6 @@
                 };
                 wmImg.onload = function() { requestAnimationFrame(() => { wmImg.style.opacity = '1'; card.setAttribute('data-wm-ok', 'true'); }); };
                 wmImg.onerror = function() { wmImg.style.display = 'none'; };
-                
                 imgWrapper.appendChild(img); imgWrapper.appendChild(wmImg); 
                 card.appendChild(imgWrapper); card.appendChild(numDiv); fragment.appendChild(card);
             }
@@ -174,7 +164,12 @@
         }
 
         function initIntersectionObserver() {
-            const observer = new IntersectionObserver((entries) => { if (entries[0].isIntersecting && !isLightboxOpen) { loadMorePosters(); } }, { rootMargin: '200px' }); 
+            const observer = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting && !isLightboxOpen) {
+                    if (currentIndex > currentTotal) { observer.disconnect(); return; }
+                    loadMorePosters();
+                }
+            }, { rootMargin: '400px' });
             observer.observe(sentinel);
         }
 
