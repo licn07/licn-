@@ -97,9 +97,10 @@
         .stamp-box.selected { border: 2.5px solid var(--ios-accent); background: rgba(255, 255, 255, 0.2); }
         .stamp-box img { max-width: 80%; }
 
-        /* 开关组件样式复原 */
         .switch-wrapper { padding: 10px; cursor: pointer; margin-right: -10px; }
         .switch { position: relative; width: 44px; height: 24px; pointer-events: none; display: inline-block; }
+        .switch.interactive { pointer-events: auto; }
+        
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #d1d1d6; transition: .3s; border-radius: 30px; }
         .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 2px; bottom: 2px; background-color: white; transition: .3s; border-radius: 50%; }
@@ -175,6 +176,18 @@
         <div class="size-option" data-w="450" data-h="700"><span>标准</span><span>450 x 700</span></div>
         <div class="size-option" data-w="180" data-h="280"><span>迷你</span><span>180 x 280</span></div>
         <div class="size-option" data-w="900" data-h="1400"><span>超高清</span><span>900 x 1400</span></div>
+        
+        <div style="margin-top:15px; border-top: 1px solid rgba(120,120,120,0.1);">
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:15px 5px;">
+                <span style="font-weight:700; user-select:none; -webkit-user-select:none;">有损压缩 (JPG)</span>
+                <div class="switch-wrapper"><label class="switch interactive"><input type="checkbox" id="lossyJpg" onchange="updateCompression('lossy')"><span class="slider"></span></label></div>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:15px 5px;">
+                <span style="font-weight:700; user-select:none; -webkit-user-select:none;">无损压缩 (PNG)</span>
+                <div class="switch-wrapper"><label class="switch interactive"><input type="checkbox" id="losslessPng" onchange="updateCompression('lossless')"><span class="slider"></span></label></div>
+            </div>
+        </div>
+
         <button id="closeBtn" style="width:100%; padding:16px; background:rgba(120,120,120,0.1); border:none; border-radius:16px; margin-top:15px; font-weight:800; color:var(--ios-accent); cursor:pointer;">完成</button>
     </div>
 </div>
@@ -202,6 +215,14 @@
     let currentW = localStorage.getItem('posterW') || 450, currentH = localStorage.getItem('posterH') || 700;
     let selectedStamp = null, uploadedFiles = [], processedFiles = [];
 
+    function updateCompression(type) {
+        if (type === 'lossy') {
+            if (document.getElementById('lossyJpg').checked) document.getElementById('losslessPng').checked = false;
+        } else {
+            if (document.getElementById('losslessPng').checked) document.getElementById('lossyJpg').checked = false;
+        }
+    }
+
     const overlay = document.getElementById('settingsOverlay');
     document.getElementById('openSettings').onclick = () => overlay.style.display = 'block';
     document.getElementById('closeBtn').onclick = () => { overlay.style.display = 'none'; if(uploadedFiles.length > 0) processImages(); };
@@ -228,28 +249,24 @@
             box.classList.add('selected');
             selectedStamp = i;
             document.getElementById('useStamp').checked = true;
-            document.getElementById('mainControl').classList.remove('expanded'); // 选完收起
+            document.getElementById('mainControl').classList.remove('expanded');
             if (window.navigator.vibrate) window.navigator.vibrate(5);
             if(uploadedFiles.length > 0) processImages();
         };
         grid.appendChild(box);
     }
 
-    // 标题区域：控制展开/收起切换
     document.getElementById('titleBtn').onclick = () => {
         const control = document.getElementById('mainControl');
         control.classList.toggle('expanded');
         if (window.navigator.vibrate) window.navigator.vibrate(5);
     };
 
-    // 开关区域：控制勾选状态，并固定触发展开
     document.getElementById('switchBtn').onclick = (e) => {
         const checkbox = document.getElementById('useStamp');
         const control = document.getElementById('mainControl');
-        
-        checkbox.checked = !checkbox.checked; // 切换开关状态
-        control.classList.add('expanded');    // 只要点开关，就展开
-        
+        checkbox.checked = !checkbox.checked;
+        control.classList.add('expanded');
         if (window.navigator.vibrate) window.navigator.vibrate(5);
         if(uploadedFiles.length > 0) processImages();
     };
@@ -265,12 +282,19 @@
         container.innerHTML = ''; processedFiles = [];
         const useStamp = document.getElementById('useStamp').checked;
         for(let i=0; i<uploadedFiles.length; i++) {
-            const blob = await processSingle(uploadedFiles[i], useStamp);
+            const file = uploadedFiles[i];
+            const blob = await processSingle(file, useStamp);
             const url = URL.createObjectURL(blob);
-            processedFiles.push({ url, name: `Poster_${i+1}.png` });
+            const sizeKB = (blob.size / 1024).toFixed(0);
+            const sizeMB = (blob.size / 1024 / 1024).toFixed(2);
+            const sizeText = (blob.size < 1024 * 1024) ? `${sizeKB} KB` : `${sizeMB} MB`;
+            
+            const originalName = file.name.split('.').slice(0, -1).join('.');
+            processedFiles.push({ url, originalName });
+            
             const card = document.createElement('div');
             card.className = 'result-card';
-            card.innerHTML = `<div class="poster-box" style="aspect-ratio:${currentW}/${currentH}"><img src="${url}" class="real-img"><img src="边框.png" class="border-overlay" onerror="this.style.opacity='0'"></div><p style="font-size:10px; margin-top:5px; color:var(--text-sub);">已生成</p>`;
+            card.innerHTML = `<div class="poster-box" style="aspect-ratio:${currentW}/${currentH}"><img src="${url}" class="real-img"><img src="边框.png" class="border-overlay" onerror="this.style.opacity='0'"></div><p style="font-size:10px; margin-top:5px; color:var(--text-sub);">已生成 · ${sizeText}</p>`;
             container.appendChild(card);
         }
         dlBtn.style.display = 'block';
@@ -282,22 +306,50 @@
             img.onload = async () => {
                 const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
                 canvas.width = currentW; canvas.height = currentH;
+                
+                const isLossy = document.getElementById('lossyJpg').checked;
+                const isLossless = document.getElementById('losslessPng').checked;
+
+                if(isLossy) {
+                    ctx.fillStyle = "#FFFFFF";
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                }
+
                 const scale = Math.max(canvas.width/img.width, canvas.height/img.height);
                 const w = img.width * scale, h = img.height * scale;
                 ctx.drawImage(img, (canvas.width-w)/2, (canvas.height-h)/2, w, h);
+                
                 if(useStamp && selectedStamp) {
                     const sImg = new Image(); sImg.src = `限定${selectedStamp}.png`;
                     await new Promise(r => { sImg.onload = r; sImg.onerror = r; });
                     const sw = canvas.width; const sh = (sImg.height / sImg.width) * sw;
                     ctx.drawImage(sImg, 0, (canvas.height - sh) / 2 + (sh / 2), sw, sh);
                 }
-                URL.revokeObjectURL(img.src); canvas.toBlob(resolve, 'image/png');
+                URL.revokeObjectURL(img.src);
+                
+                if(isLossy) {
+                    canvas.toBlob(resolve, 'image/jpeg', 0.85);
+                } else {
+                    canvas.toBlob(resolve, 'image/png');
+                }
             };
         });
     }
 
+    // 修复下载逻辑：不再使用延时循环，改为在用户直接点击时触发单次遍历下载
     document.getElementById('downloadBtn').onclick = () => {
-        processedFiles.forEach((f, i) => { setTimeout(() => { const a = document.createElement('a'); a.href = f.url; a.download = f.name; a.click(); }, i * 350); });
+        const isLossy = document.getElementById('lossyJpg').checked;
+        const isLossless = document.getElementById('losslessPng').checked;
+        const needsSuffix = isLossy || isLossless;
+        const ext = isLossy ? '.jpg' : '.png';
+        const suffix = needsSuffix ? '压缩' : '';
+        
+        processedFiles.forEach(f => { 
+            const a = document.createElement('a'); 
+            a.href = f.url; 
+            a.download = f.originalName + suffix + ext; 
+            a.click(); 
+        });
     };
 </script>
 </body>
