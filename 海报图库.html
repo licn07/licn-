@@ -78,12 +78,10 @@
     </div>
 
     <script>
-        // 你的原有 JS 全部保留，只增加这两行逻辑
         let pendingCategory = '';
         function showModal(type) { pendingCategory = type; document.getElementById('alertModal').style.display = 'flex'; }
         function confirmLoad() { document.getElementById('alertModal').style.display = 'none'; triggerAndSelect(pendingCategory); }
 
-        // 以下全部为你原始的 JS 代码
         const gridContainer = document.getElementById('galleryGrid');
         const welcomeGate = document.getElementById('welcomeGate');
         const controlBar = document.getElementById('controlBar');
@@ -99,7 +97,7 @@
         const BATCH_SIZE = 20;     
         let isLightboxOpen = false;
 
-        function triggerAndSelect(type, element) {
+        function triggerAndSelect(type) {
             welcomeGate.classList.add('hide');
             controlBar.classList.add('show'); 
             sentinel.style.display = 'flex';
@@ -127,24 +125,31 @@
             for (let i = currentIndex; i <= end; i++) {
                 const card = document.createElement('div');
                 card.className = 'poster-card';
-                card.setAttribute('data-src', `${currentCategory}${i}.png`);
-                card.setAttribute('data-wmsrc', `${currentCategory}水印${i}.png`);
+                // 修改路径：增加文件夹路径
+                card.setAttribute('data-src', `${currentCategory}图/${currentCategory}${i}.png`);
+                card.setAttribute('data-wmsrc', `${currentCategory}图/${currentCategory}水印${i}.png`);
+                
                 const imgWrapper = document.createElement('div');
                 imgWrapper.className = 'image-wrapper';
+                
                 const img = document.createElement('img');
                 img.className = 'poster-img';
-                img.src = `${currentCategory}${i}.png`; 
+                img.src = `${currentCategory}图/${currentCategory}${i}.png`; 
                 img.loading = "lazy"; 
+                
                 const wmImg = document.createElement('img');
                 wmImg.className = 'wm-img';
-                wmImg.src = `${currentCategory}水印${i}.png`; 
+                wmImg.src = `${currentCategory}图/${currentCategory}水印${i}.png`; 
+                
                 const numDiv = document.createElement('div');
                 numDiv.className = 'poster-number';
                 numDiv.innerText = i; 
+                
                 img.onload = function() { requestAnimationFrame(() => { card.style.opacity = '1'; img.style.opacity = '1'; numDiv.style.opacity = '1'; }); };
                 img.onerror = function() { card.style.display = 'none'; };
                 wmImg.onload = function() { requestAnimationFrame(() => { wmImg.style.opacity = '1'; card.setAttribute('data-wm-ok', 'true'); }); };
                 wmImg.onerror = function() { wmImg.style.display = 'none'; };
+                
                 imgWrapper.appendChild(img); imgWrapper.appendChild(wmImg); 
                 card.appendChild(imgWrapper); card.appendChild(numDiv); fragment.appendChild(card);
             }
