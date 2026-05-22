@@ -39,6 +39,7 @@
     </style>
 </head>
 <body>
+
     <div class="alert-overlay" id="alertModal">
         <div class="alert-box">
             <div style="font-weight:bold; font-size:18px; margin-bottom:12px;">温馨提示</div>
@@ -89,9 +90,8 @@
         let currentCategory = '';
         let currentIndex = 1;
         let currentTotal = 0;
-        let errorCount = 0;
-        const MAX_ERRORS = 5;
         const LIMITS = { '普通': 250, '精品': 100 };
+        const BATCH_SIZE = 8;     
         let isLightboxOpen = false;
 
         function triggerAndSelect(type) {
@@ -100,9 +100,7 @@
             sentinel.style.display = 'flex';
             currentCategory = type;
             currentTotal = LIMITS[type];
-            errorCount = 0;
-            // 初始加载一张
-            loadNextPoster();
+            loadMorePosters();
             initIntersectionObserver();
         }
 
@@ -113,74 +111,55 @@
             currentIndex = 1;
             currentCategory = '';
             currentTotal = 0;
-            errorCount = 0;
             sentinel.innerText = "正在加载更多海报...";
+            // 返回时重置为四排布局
             switchLayout(4);
         }
 
-        function loadNextPoster() {
+        function loadMorePosters() {
             if (currentIndex > currentTotal || isLightboxOpen) return; 
-            
-            const i = currentIndex;
-            const card = document.createElement('div');
-            card.className = 'poster-card';
-            const src = `${currentCategory}图/${currentCategory}${i}.png`;
-            const wmSrc = `${currentCategory}图/${currentCategory}水印${i}.png`;
-            
-            card.setAttribute('data-src', src);
-            card.setAttribute('data-wmsrc', wmSrc);
-            
-            const imgWrapper = document.createElement('div');
-            imgWrapper.className = 'image-wrapper';
-            
-            const img = document.createElement('img');
-            img.className = 'poster-img';
-            img.src = src; 
-            img.loading = "lazy"; 
-            
-            const wmImg = document.createElement('img');
-            wmImg.className = 'wm-img';
-            wmImg.src = wmSrc; 
-            
-            const numDiv = document.createElement('div');
-            numDiv.className = 'poster-number';
-            numDiv.innerText = i; 
-            
-            img.onload = function() { 
-                errorCount = 0;
-                requestAnimationFrame(() => { card.style.opacity = '1'; img.style.opacity = '1'; numDiv.style.opacity = '1'; }); 
-            };
-            img.onerror = function() { 
-                errorCount++;
-                card.style.display = 'none'; 
-                if (errorCount >= MAX_ERRORS) {
-                    currentIndex = currentTotal + 1;
-                    sentinel.innerText = "已加载全部海报";
-                }
-            };
-            wmImg.onload = function() { requestAnimationFrame(() => { wmImg.style.opacity = '1'; card.setAttribute('data-wm-ok', 'true'); }); };
-            wmImg.onerror = function() { wmImg.style.display = 'none'; };
-            
-            imgWrapper.appendChild(img); 
-            imgWrapper.appendChild(wmImg); 
-            card.appendChild(imgWrapper); 
-            card.appendChild(numDiv); 
-            gridContainer.appendChild(card);
-            
-            currentIndex++;
+            const fragment = document.createDocumentFragment();
+            const end = Math.min(currentIndex + BATCH_SIZE - 1, currentTotal);
+            for (let i = currentIndex; i <= end; i++) {
+                const card = document.createElement('div');
+                card.className = 'poster-card';
+                const src = `${currentCategory}图/${currentCategory}${i}.png`;
+                const wmSrc = `${currentCategory}图/${currentCategory}水印${i}.png`;
+                
+                card.setAttribute('data-src', src);
+                card.setAttribute('data-wmsrc', wmSrc);
+                
+                const imgWrapper = document.createElement('div');
+                imgWrapper.className = 'image-wrapper';
+                
+                const img = document.createElement('img');
+                img.className = 'poster-img';
+                img.src = src; 
+                img.loading = "lazy"; 
+                
+                const wmImg = document.createElement('img');
+                wmImg.className = 'wm-img';
+                wmImg.src = wmSrc; 
+                
+                const numDiv = document.createElement('div');
+                numDiv.className = 'poster-number';
+                numDiv.innerText = i; 
+                
+                img.onload = function() { requestAnimationFrame(() => { card.style.opacity = '1'; img.style.opacity = '1'; numDiv.style.opacity = '1'; }); };
+                img.onerror = function() { card.style.display = 'none'; };
+                wmImg.onload = function() { requestAnimationFrame(() => { wmImg.style.opacity = '1'; card.setAttribute('data-wm-ok', 'true'); }); };
+                wmImg.onerror = function() { wmImg.style.display = 'none'; };
+                
+                imgWrapper.appendChild(img); imgWrapper.appendChild(wmImg); 
+                card.appendChild(imgWrapper); card.appendChild(numDiv); fragment.appendChild(card);
+            }
+            gridContainer.appendChild(fragment);
+            currentIndex = end + 1;
             if (currentIndex > currentTotal) { sentinel.innerText = "已加载全部海报"; }
         }
 
         function initIntersectionObserver() {
-            const observer = new IntersectionObserver((entries) => {
-                if (entries[0].isIntersecting && !isLightboxOpen) {
-                    if (currentIndex <= currentTotal) {
-                        loadNextPoster();
-                    } else {
-                        observer.disconnect();
-                    }
-                }
-            }, { rootMargin: '400px' });
+            const observer = new IntersectionObserver((entries) => { if (entries[0].isIntersecting && !isLightboxOpen) { loadMorePosters(); } }, { rootMargin: '200px' }); 
             observer.observe(sentinel);
         }
 
