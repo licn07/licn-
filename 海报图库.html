@@ -92,7 +92,6 @@
         let errorCount = 0;
         const MAX_ERRORS = 5;
         const LIMITS = { '普通': 250, '精品': 100 };
-        const BATCH_SIZE = 8;     
         let isLightboxOpen = false;
 
         function triggerAndSelect(type) {
@@ -102,7 +101,8 @@
             currentCategory = type;
             currentTotal = LIMITS[type];
             errorCount = 0;
-            loadMorePosters();
+            // 初始加载一张
+            loadNextPoster();
             initIntersectionObserver();
         }
 
@@ -118,56 +118,67 @@
             switchLayout(4);
         }
 
-        function loadMorePosters() {
+        function loadNextPoster() {
             if (currentIndex > currentTotal || isLightboxOpen) return; 
-            const fragment = document.createDocumentFragment();
-            const end = Math.min(currentIndex + BATCH_SIZE - 1, currentTotal);
-            for (let i = currentIndex; i <= end; i++) {
-                const card = document.createElement('div');
-                card.className = 'poster-card';
-                const src = `${currentCategory}图/${currentCategory}${i}.png`;
-                const wmSrc = `${currentCategory}图/${currentCategory}水印${i}.png`;
-                card.setAttribute('data-src', src);
-                card.setAttribute('data-wmsrc', wmSrc);
-                const imgWrapper = document.createElement('div');
-                imgWrapper.className = 'image-wrapper';
-                const img = document.createElement('img');
-                img.className = 'poster-img';
-                img.src = src; 
-                img.loading = "lazy"; 
-                const wmImg = document.createElement('img');
-                wmImg.className = 'wm-img';
-                wmImg.src = wmSrc; 
-                const numDiv = document.createElement('div');
-                numDiv.className = 'poster-number';
-                numDiv.innerText = i; 
-                img.onload = function() { 
-                    errorCount = 0;
-                    requestAnimationFrame(() => { card.style.opacity = '1'; img.style.opacity = '1'; numDiv.style.opacity = '1'; }); 
-                };
-                img.onerror = function() { 
-                    errorCount++;
-                    card.style.display = 'none'; 
-                    if (errorCount >= MAX_ERRORS) {
-                        currentIndex = currentTotal + 1;
-                        sentinel.innerText = "已加载全部海报";
-                    }
-                };
-                wmImg.onload = function() { requestAnimationFrame(() => { wmImg.style.opacity = '1'; card.setAttribute('data-wm-ok', 'true'); }); };
-                wmImg.onerror = function() { wmImg.style.display = 'none'; };
-                imgWrapper.appendChild(img); imgWrapper.appendChild(wmImg); 
-                card.appendChild(imgWrapper); card.appendChild(numDiv); fragment.appendChild(card);
-            }
-            gridContainer.appendChild(fragment);
-            currentIndex = end + 1;
+            
+            const i = currentIndex;
+            const card = document.createElement('div');
+            card.className = 'poster-card';
+            const src = `${currentCategory}图/${currentCategory}${i}.png`;
+            const wmSrc = `${currentCategory}图/${currentCategory}水印${i}.png`;
+            
+            card.setAttribute('data-src', src);
+            card.setAttribute('data-wmsrc', wmSrc);
+            
+            const imgWrapper = document.createElement('div');
+            imgWrapper.className = 'image-wrapper';
+            
+            const img = document.createElement('img');
+            img.className = 'poster-img';
+            img.src = src; 
+            img.loading = "lazy"; 
+            
+            const wmImg = document.createElement('img');
+            wmImg.className = 'wm-img';
+            wmImg.src = wmSrc; 
+            
+            const numDiv = document.createElement('div');
+            numDiv.className = 'poster-number';
+            numDiv.innerText = i; 
+            
+            img.onload = function() { 
+                errorCount = 0;
+                requestAnimationFrame(() => { card.style.opacity = '1'; img.style.opacity = '1'; numDiv.style.opacity = '1'; }); 
+            };
+            img.onerror = function() { 
+                errorCount++;
+                card.style.display = 'none'; 
+                if (errorCount >= MAX_ERRORS) {
+                    currentIndex = currentTotal + 1;
+                    sentinel.innerText = "已加载全部海报";
+                }
+            };
+            wmImg.onload = function() { requestAnimationFrame(() => { wmImg.style.opacity = '1'; card.setAttribute('data-wm-ok', 'true'); }); };
+            wmImg.onerror = function() { wmImg.style.display = 'none'; };
+            
+            imgWrapper.appendChild(img); 
+            imgWrapper.appendChild(wmImg); 
+            card.appendChild(imgWrapper); 
+            card.appendChild(numDiv); 
+            gridContainer.appendChild(card);
+            
+            currentIndex++;
             if (currentIndex > currentTotal) { sentinel.innerText = "已加载全部海报"; }
         }
 
         function initIntersectionObserver() {
             const observer = new IntersectionObserver((entries) => {
                 if (entries[0].isIntersecting && !isLightboxOpen) {
-                    if (currentIndex > currentTotal) { observer.disconnect(); return; }
-                    loadMorePosters();
+                    if (currentIndex <= currentTotal) {
+                        loadNextPoster();
+                    } else {
+                        observer.disconnect();
+                    }
                 }
             }, { rootMargin: '400px' });
             observer.observe(sentinel);
