@@ -103,6 +103,8 @@
             currentCategory = type;
             currentTotal = LIMITS[type];
             errorCount = 0;
+            // 修复逻辑：初始加载两批 (16个)，确保铺满屏幕
+            loadMorePosters();
             loadMorePosters();
             initIntersectionObserver();
         }
