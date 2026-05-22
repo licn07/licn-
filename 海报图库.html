@@ -125,9 +125,9 @@
             for (let i = currentIndex; i <= end; i++) {
                 const card = document.createElement('div');
                 card.className = 'poster-card';
-                // 使用根相对路径 /licn-/ 确保在任何页面下都能正确寻址
-                const src = `/licn-/${currentCategory}图/${currentCategory}${i}.png`;
-                const wmSrc = `/licn-/${currentCategory}图/${currentCategory}水印${i}.png`;
+                // 已修改：删除 /licn-/ 前缀，直接使用文件夹路径
+                const src = `${currentCategory}图/${currentCategory}${i}.png`;
+                const wmSrc = `${currentCategory}图/${currentCategory}水印${i}.png`;
                 
                 card.setAttribute('data-src', src);
                 card.setAttribute('data-wmsrc', wmSrc);
