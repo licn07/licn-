@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>LiCN · 巨幅WebP批量处理器</title>
+    <style>
+        /* ===== 完全适配中枢背景样式 + 暗色模式支持 ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* 根变量 (亮色模式) */
+        :root {
+            --ios-blue: #007AFF;
+            --bg-color: #F5F5F7;
+            --grid-line: rgba(0, 122, 255, 0.05);
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --card-border: rgba(255, 255, 255, 0.8);
+            --text-main: #1D1D1F;
+            --text-sub: rgba(0, 0, 0, 0.5);
+            --shadow: 0 10px 30px rgba(0,0,0,0.03);
+            --toggle-bg: rgba(0, 0, 0, 0.05);
+            --progress-bar-bg: rgba(0,0,0,0.08);
+            --btn-select-bg: linear-gradient(105deg, rgba(255,255,245,0.95), rgba(245, 250, 255, 0.98));
+            --btn-select-color: #0077cc;
+            --btn-download-bg: linear-gradient(115deg, #2c6e2c, #1f9a4a);
+            --header-bg: transparent;
+        }
+
+        /* 暗色模式 */
+        .dark-mode {
+            --ios-blue: #00CCFF;
+            --bg-color: #050505;
+            --grid-line: rgba(255, 255, 255, 0.05);
+            --card-bg: rgba(28, 28, 30, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-sub: rgba(255, 255, 255, 0.5);
+            --shadow: 0 10px 40px rgba(0,0,0,0.6);
+            --toggle-bg: rgba(255, 255, 255, 0.1);
+            --progress-bar-bg: rgba(255,255,255,0.08);
+            --btn-select-bg: rgba(28, 28, 30, 0.9);
+            --btn-select-color: #00aaff;
+            --btn-download-bg: linear-gradient(115deg, #1e6b2e, #15803d);
+            --header-bg: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                linear-gradient(var(--grid-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 30px 30px;
+            background-attachment: fixed;
+            font-family: -apple-system, "SF Pro Text", "SF Pro Display", BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* 标题栏（融入主题切换） */
+        .app-header {
+            position: relative;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px 8px 20px;
+            background: transparent;
+        }
+        .header-title {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, var(--text-main) 60%, var(--text-sub) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .header-sub {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-sub);
+            margin-top: 2px;
+            letter-spacing: 0.2px;
+        }
+        .theme-toggle-header {
+            width: 40px;
+            height: 40px;
+            background: var(--toggle-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow);
+        }
+        .mode-icon {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2px solid var(--text-main);
+            position: relative;
+        }
+        .dark-mode .mode-icon {
+            background: var(--text-main);
+            box-shadow: -5px -4px 0 0 var(--bg-color) inset;
+            border: none;
+        }
+
+        .sticky-status, .main-scroll, .footer-bar {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* 状态卡片 */
+        .sticky-status {
+            position: sticky;
+            top: 0;
+            padding: 12px 20px 12px 20px;
+            z-index: 210;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+        .control-block {
+            background: var(--card-bg);
+            backdrop-filter: blur(30px) saturate(150%);
+            -webkit-backdrop-filter: blur(30px) saturate(150%);
+            border: 1px solid var(--card-border);
+            border-radius: 28px;
+            padding: 14px 20px;
+            width: 100%;
+            max-width: 315px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+        .status-msg {
+            font-size: 11.5px;
+            font-weight: 500;
+            font-family: 'SF Mono', Menlo, monospace;
+            color: var(--text-main);
+            line-height: 1.45;
+            text-align: center;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+        .status-msg::before {
+            content: "✨";
+            font-size: 12px;
+            margin-right: 4px;
+        }
+        
+        /* 进度条区域 */
+        .progress-area {
+            margin-top: 6px;
+            width: 100%;
+        }
+        .progress-bar-container {
+            background: var(--progress-bar-bg);
+            border-radius: 12px;
+            height: 5px;
+            width: 100%;
+            overflow: hidden;
+        }
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #34c759, #2fbd5a);
+            border-radius: 12px;
+            transition: width 0.15s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 9.5px;
+            font-weight: 500;
+            color: var(--text-sub);
+            margin-top: 6px;
+            font-family: 'SF Mono', monospace;
+        }
+        .progress-stats span:last-child {
+            font-weight: 600;
+            color: #34c759;
+        }
+        
+        /* 滚动区域 + 预览网格 */
+        .main-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 16px 32px 16px;
+            scroll-behavior: smooth;
+        }
+        .main-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .main-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .main-scroll::-webkit-scrollbar-thumb {
+            background: var(--text-sub);
+            border-radius: 20px;
+        }
+        .scroll-content {
+            max-width: 520px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+            gap: 20px;
+            justify-items: center;
+            align-items: start;
+            width: 100%;
+            margin-bottom: 18px;
+        }
+        .grid-container:empty::before {
+            content: none;
+            display: none;
+        }
+
+        .preview-item {
+            width: 128px;
+            height: 196px;
+            border-radius: 20px;
+            overflow: hidden;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 0.5px solid var(--card-border);
+        }
+        .preview-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 28px -14px rgba(0, 0, 0, 0.22);
+        }
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            animation: fadeRise 0.4s forwards;
+        }
+        @keyframes fadeRise {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* 底部栏 */
+        .footer-bar {
+            position: fixed;
+            bottom: 18px;
+            left: 0;
+            right: 0;
+            padding: 0 20px;
+            z-index: 100;
+        }
+        .footer-content {
+            max-width: 460px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: row;
+            gap: 14px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn {
+            flex: 1;
+            padding: 14px 12px;
+            border-radius: 38px;
+            border: none;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-align: center;
+            backdrop-filter: blur(8px);
+            box-shadow: var(--shadow);
+        }
+        #selectBtn {
+            background: var(--btn-select-bg);
+            color: var(--btn-select-color);
+            border: 0.5px solid var(--card-border);
+        }
+        #selectBtn:active {
+            transform: scale(0.97);
+        }
+        #selectBtn:disabled {
+            opacity: 0.6;
+            transform: none;
+        }
+        #downloadBtn {
+            background: var(--btn-download-bg);
+            color: white;
+            border: none;
+            display: none;
+        }
+        #downloadBtn:active {
+            transform: scale(0.97);
+        }
+        .download-hint {
+            font-size: 9px;
+            color: var(--text-sub);
+            text-align: center;
+            margin-top: 6px;
+            font-weight: 500;
+            flex-basis: 100%;
+        }
+        
+        @supports (padding-bottom: env(safe-area-inset-bottom)) {
+            .footer-bar {
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+            .main-scroll {
+                padding-bottom: calc(32px + env(safe-area-inset-bottom));
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-header">
+        <div>
+            <div class="header-title">巨幅 WebP 批量处理器</div>
+            <div class="header-sub">超清重绘 · 极速批量</div>
+        </div>
+        <div class="theme-toggle-header" onclick="manualToggle()">
+            <div class="mode-icon"></div>
+        </div>
+    </div>
+
+    <div class="sticky-status">
+        <div class="control-block">
+            <div id="statusMsg" class="status-msg">点击下方按钮选择多张图片...</div>
+            <div class="progress-area" id="progressArea" style="display: none;">
+                <div class="progress-bar-container">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-stats">
+                    <span id="progressText">准备就绪</span>
+                    <span id="progressPercent">0%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main class="main-scroll">
+        <div class="scroll-content">
+            <div class="grid-container" id="gridContainer"></div>
+        </div>
+    </main>
+
+    <footer class="footer-bar">
+        <div class="footer-content">
+            <button id="selectBtn" class="btn">✨ 选择图片</button>
+            <button id="downloadBtn" class="btn">📦 打包下载</button>
+            <div class="download-hint">💡 浏览器若拦截多个弹窗，请允许此站点下载</div>
+        </div>
+    </footer>
+
+    <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp,image/bmp" multiple style="display:none">
+
+    <script>
+        // 暗色模式切换
+        function manualToggle() {
+            const isDark = document.body.classList.toggle('dark-mode');
+            try {
+                localStorage.setItem('webp-dark-mode', isDark ? 'dark' : 'light');
+            } catch(e) {}
+        }
+        try {
+            const saved = localStorage.getItem('webp-dark-mode');
+            if (saved === 'dark') document.body.classList.add('dark-mode');
+        } catch(e) {}
+
+        // ========== 核心逻辑 + 每张图片进度从 9% 平滑增长到 100% ==========
+        const T_W = 10006, T_H = Math.round(T_W * 14 / 9), Q = 0.1;
+        let processedBlobs = [];
+        let isDownloading = false;
+
+        const fileInput = document.getElementById('fileInput');
+        const selectBtn = document.getElementById('selectBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const statusMsg = document.getElementById('statusMsg');
+        const gridContainer = document.getElementById('gridContainer');
+        const progressArea = document.getElementById('progressArea');
+        const progressFill = document.getElementById('progressFill');
+        const progressTextSpan = document.getElementById('progressText');
+        const progressPercentSpan = document.getElementById('progressPercent');
+
+        let currentTotal = 0;
+        let currentCompleted = 0;
+        let simulationInterval = null;
+        let currentImageTargetPercent = 0;   // 当前图片处理完成后的整体百分比目标
+        let currentImageStartPercent = 0;     // 当前图片开始模拟时的起始百分比（含有9%偏移）
+
+        function stopSimulation() {
+            if (simulationInterval) {
+                clearInterval(simulationInterval);
+                simulationInterval = null;
+            }
+        }
+
+        // 针对单张图片启动平滑模拟：从 startPercent 增长到 targetPercent
+        function startSimulatingProgressForImage(startPercent, targetPercent) {
+            stopSimulation();
+            if (!progressArea || progressArea.style.display === 'none') return;
+            if (startPercent >= targetPercent) {
+                progressFill.style.width = targetPercent + '%';
+                return;
+            }
+            const diff = targetPercent - startPercent;
+            // 模拟时长：与剩余量成正比，最短 200ms 最长 600ms
+            const duration = Math.min(600, Math.max(200, diff * 6));
+            const stepMs = 20;
+            const steps = Math.ceil(duration / stepMs);
+            const increment = diff / steps;
+            let stepCount = 0;
+            let currentWidth = startPercent;
+            progressFill.style.width = currentWidth + '%';
+            
+            simulationInterval = setInterval(() => {
+                stepCount++;
+                let newWidth = currentWidth + increment * stepCount;
+                if (newWidth >= targetPercent) {
+                    newWidth = targetPercent;
+                    progressFill.style.width = newWidth + '%';
+                    stopSimulation();
+                } else {
+                    progressFill.style.width = newWidth + '%';
+                }
+                const percentVal = Math.min(100, Math.floor(newWidth));
+                progressPercentSpan.innerText = `${percentVal}%`;
+                // 更新辅助文字显示
+                const currentImageNumber = currentCompleted + 1;
+                progressTextSpan.innerText = `处理中 ${currentImageNumber}/${currentTotal} · ${Math.floor((newWidth - (currentImageNumber-1)*100/currentTotal) / (100/currentTotal) * 100)}%`;
+                if (currentCompleted < currentTotal && newWidth < 100) {
+                    // 保持描述
+                }
+            }, stepMs);
+        }
+
+        function resetProgress(totalCount) {
+            currentTotal = totalCount;
+            currentCompleted = 0;
+            stopSimulation();
+            if (totalCount > 0) {
+                progressArea.style.display = 'block';
+                progressFill.style.width = '0%';
+                progressPercentSpan.innerText = '0%';
+                progressTextSpan.innerText = `处理中 0/${totalCount}`;
+            } else {
+                progressArea.style.display = 'none';
+            }
+        }
+        
+        // 图片实际处理完成后调用，确保进度条到达该图片的正确终点
+        function finishCurrentImage() {
+            if (currentCompleted >= currentTotal) return;
+            currentCompleted++;
+            const realTargetPercent = (currentCompleted / currentTotal) * 100;
+            stopSimulation();
+            progressFill.style.width = `${realTargetPercent}%`;
+            progressPercentSpan.innerText = `${Math.floor(realTargetPercent)}%`;
+            progressTextSpan.innerText = `✅ 已完成 ${currentCompleted}/${currentTotal}`;
+            if (currentCompleted === currentTotal) {
+                progressTextSpan.innerText = `🎉 全部完成 ${currentTotal}/${currentTotal}`;
+                progressPercentSpan.innerText = `100%`;
+            }
+        }
+
+        selectBtn.onclick = () => {
+            if (selectBtn.disabled) return;
+            fileInput.click();
+        };
+
+        fileInput.onchange = async (e) => {
+            const files = Array.from(e.target.files);
+            if (files.length === 0) return;
+
+            if (isDownloading) {
+                statusMsg.innerText = '⏳ 请等待当前下载任务完成后再选图...';
+                return;
+            }
+
+            // 清理旧数据
+            const oldImgs = gridContainer.querySelectorAll('.preview-item img');
+            oldImgs.forEach(img => {
+                if (img.src && img.src.startsWith('blob:')) URL.revokeObjectURL(img.src);
+            });
+            gridContainer.innerHTML = '';
+            processedBlobs = [];
+            downloadBtn.style.display = 'none';
+            
+            selectBtn.disabled = true;
+            selectBtn.innerText = "⏳ 处理中...";
+            
+            resetProgress(files.length);
+            
+            const isWebP = await checkWebPSupport();
+
+            for (let i = 0; i < files.length; i++) {
+                statusMsg.innerText = `⚙️ 处理 (${i + 1}/${files.length}): ${files[i].name}`;
+                
+                // 计算当前图片的整体进度区间：
+                // 本图片开始时的真实完成占比 = i / total
+                const beforePercent = (i / files.length) * 100;
+                // 本图片完成后的真实完成占比 = (i+1)/total
+                const afterRealPercent = ((i + 1) / files.length) * 100;
+                // 为了让进度从该图片区间的 9% 开始增长，起始模拟百分比 = beforePercent + (afterRealPercent - beforePercent) * 0.09
+                const imageRange = afterRealPercent - beforePercent;
+                const startPercentForImage = beforePercent + imageRange * 0.09;
+                // 确保起始点不会超过终点
+                const finalTarget = afterRealPercent;
+                
+                // 启动平滑模拟（从 startPercentForImage 增长到 finalTarget）
+                startSimulatingProgressForImage(startPercentForImage, finalTarget);
+                
+                // 真实处理图片（耗时操作）
+                const { blob, url } = await processSingleImage(files[i], isWebP);
+                processedBlobs.push({ blob, name: `processed_${files[i].name.split('.')[0]}.webp` });
+                
+                // 添加预览卡片
+                const div = document.createElement('div');
+                div.className = 'preview-item';
+                div.innerHTML = `<img src="${url}">`;
+                gridContainer.appendChild(div);
+                
+                // 图片处理完成，停止模拟并将进度条校正到真实完成值
+                stopSimulation();
+                finishCurrentImage();
+            }
+
+            statusMsg.innerText = `✅ 全部 ${processedBlobs.length} 张处理完成！`;
+            progressFill.style.width = '100%';
+            progressPercentSpan.innerText = '100%';
+            progressTextSpan.innerText = `🎉 完成 ${currentTotal}/${currentTotal}`;
+            
+            selectBtn.disabled = false;
+            selectBtn.innerText = "✨ 选择图片";
+            downloadBtn.style.display = 'block';
+        };
+
+        function checkWebPSupport() {
+            const c = document.createElement('canvas');
+            c.width = 1; c.height = 1;
+            return new Promise(r => c.toBlob(b => r(b && b.type === 'image/webp'), 'image/webp', 0.8));
+        }
+
+        function processSingleImage(file, isWebP) {
+            return new Promise(resolve => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = T_W;
+                        canvas.height = T_H;
+                        const ctx = canvas.getContext('2d');
+                        ctx.fillStyle = '#fff';
+                        ctx.fillRect(0, 0, T_W, T_H);
+                        ctx.drawImage(img, 0, 0, T_W, T_H);
+                        canvas.toBlob(blob => {
+                            resolve({ blob, url: URL.createObjectURL(blob) });
+                        }, isWebP ? 'image/webp' : 'image/jpeg', Q);
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // 释放预览内存（下载完成后调用）
+        function releasePreviewMemory() {
+            const items = gridContainer.querySelectorAll('.preview-item img');
+            items.forEach(img => {
+                if (img.src && img.src.startsWith('blob:')) URL.revokeObjectURL(img.src);
+            });
+            gridContainer.innerHTML = '';
+            processedBlobs = [];
+            downloadBtn.style.display = 'none';
+            progressArea.style.display = 'none';
+            statusMsg.innerText = '✨ 下载完成，内存已释放。可继续选择新图片。';
+            setTimeout(() => {
+                if (statusMsg.innerText.includes('内存已释放')) {
+                    statusMsg.innerText = '点击下方按钮选择多张图片...';
+                }
+            }, 3000);
+        }
+
+        downloadBtn.onclick = () => {
+            if (processedBlobs.length === 0) {
+                statusMsg.innerText = '没有可下载的图片，请先选择并处理图片。';
+                return;
+            }
+            if (isDownloading) {
+                statusMsg.innerText = '下载进行中，请稍后...';
+                return;
+            }
+            isDownloading = true;
+            const total = processedBlobs.length;
+            let completedDownloads = 0;
+
+            selectBtn.disabled = true;
+            selectBtn.innerText = "⏳ 下载中...";
+            statusMsg.innerText = `📥 开始下载 ${total} 个文件...`;
+
+            processedBlobs.forEach((item, index) => {
+                setTimeout(() => {
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(item.blob);
+                    a.download = item.name;
+                    a.click();
+                    URL.revokeObjectURL(a.href);
+                    completedDownloads++;
+                    statusMsg.innerText = `📥 下载进度: ${completedDownloads}/${total}`;
+                    
+                    if (completedDownloads === total) {
+                        setTimeout(() => {
+                            releasePreviewMemory();
+                            selectBtn.disabled = false;
+                            selectBtn.innerText = "✨ 选择图片";
+                            isDownloading = false;
+                            statusMsg.innerText = '✅ 所有文件已下载，预览内存已释放。';
+                            setTimeout(() => {
+                                if (statusMsg.innerText.includes('已释放')) {
+                                    statusMsg.innerText = '点击下方按钮选择多张图片...';
+                                }
+                            }, 2500);
+                        }, 300);
+                    }
+                }, index * 200);
+            });
+        };
+    </script>
+</body>
+</html>
